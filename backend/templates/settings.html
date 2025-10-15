@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AquaTrace AI 🌊</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        /* Enhanced dark overlay */
+        .bg-overlay {
+            background: rgba(5, 15, 35, 0.92) !important;
+        }
+        
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .settings-section {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.2);
+        }
+        
+        .settings-title {
+            color: #00d4ff;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+        }
+        
+        .section-title {
+            color: #00d4ff;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            color: #e1f5fe;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 30, 60, 0.4);
+            color: #e1f5fe;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+            background: rgba(0, 30, 60, 0.6);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+        }
+        
+        .user-info {
+            background: rgba(0, 30, 60, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            color: #b3e5fc;
+            font-weight: 600;
+        }
+        
+        .info-value {
+            color: #00d4ff;
+            font-weight: 700;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 15px;
+        }
+        
+        .settings-section {
+                padding: 20px;
+            }
+            
+            .settings-title {
+                font-size: 1.8em;
+            }
+            
+            .section-title {
+                font-size: 1.3em;
+            }
+            
+            .form-input {
+                padding: 12px;
+                font-size: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 15px;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-wrap">
+        <video autoplay muted loop class="bg-video">
+            <source src="{{ url_for('static', filename='assets/underwater.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+    </div>
+    
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/map">Map</a>
+            <a href="/conservation">Challenges</a>
+                <a href="/settings" class="active">Settings</a>
+                <a href="/logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <div class="settings-container">
+            <h1 class="settings-title">⚙️ Account Settings</h1>
+            
+            <!-- User Information -->
+                <div class="settings-section">
+                <h2 class="section-title">👤 User Information</h2>
+                <div class="user-info">
+                    <div class="info-item">
+                        <span class="info-label">Username:</span>
+                        <span class="info-value">{{ user.username }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">{{ user.email }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Member Since:</span>
+                        <span class="info-value">{{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'Unknown' }}</span>
+                    </div>
+                            </div>
+                        </div>
+                        
+            <!-- Profile Settings -->
+            <div class="settings-section">
+                <h2 class="section-title">✏️ Update Profile</h2>
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input type="text" id="username" name="username" class="form-input" value="{{ user.username }}" required>
+                    </div>
+                        <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" value="{{ user.email }}" required>
+                        </div>
+                        <div class="form-group">
+                        <label class="form-label" for="bio">Bio (Optional)</label>
+                        <textarea id="bio" name="bio" class="form-input" rows="3" placeholder="Tell us about yourself...">{{ user.bio if user.bio else '' }}</textarea>
+                            </div>
+                    <button type="submit" class="btn btn-success">💾 Save Changes</button>
+                </form>
+                        </div>
+                        
+            <!-- Account Actions -->
+            <div class="settings-section">
+                <h2 class="section-title">🔧 Account Actions</h2>
+                <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                    <button class="btn" onclick="exportData()">📊 Export My Data</button>
+                    <button class="btn btn-danger" onclick="deleteAccount()">🗑️ Delete Account</button>
+                    </div>
+                </div>
+                
+            <!-- Privacy Settings -->
+                <div class="settings-section">
+                <h2 class="section-title">🔒 Privacy & Security</h2>
+                        <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="dataSharing" style="margin-right: 10px;">
+                        Allow data sharing for research purposes
+                            </label>
+                        </div>
+                        <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="emailNotifications" style="margin-right: 10px;">
+                        Receive email notifications
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+    <footer> 2025 AquaTrace AI — Empowering Ocean Conservation 🌊</footer>
+    
+    <script>
+        // Mobile navigation toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('nav-open');
+                navToggle.classList.toggle('nav-open');
+            });
+            
+            navLinks.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('nav-open');
+                }
+            });
+        }
+        
+        // Profile form submission
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                bio: document.getElementById('bio').value
+            };
+            
+            try {
+                const response = await fetch('/update_profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('Profile updated successfully!', 'success');
+                    } else {
+                    showNotification('Error updating profile: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showNotification('Error updating profile: ' + error.message, 'error');
+            }
+        });
+        
+        // Export data
+        function exportData() {
+            window.location.href = '/export_data';
+        }
+        
+        // Delete account
+        function deleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                if (confirm('This will permanently delete all your data. Are you absolutely sure?')) {
+                    // Implement account deletion
+                    showNotification('Account deletion feature coming soon!', 'info');
+                }
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notif = document.createElement('div');
+            notif.textContent = message;
+            notif.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #4caf50, #45a049)' : 
+                           type === 'error' ? 'linear-gradient(135deg, #f44336, #d32f2f)' : 
+                           'linear-gradient(135deg, #00d4ff, #0099cc)'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 3000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                font-weight: 600;
+            `;
+            
+            document.body.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

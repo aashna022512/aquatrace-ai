@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - AquaTrace AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        /* Added inline styles for responsive fixes */
+        html, body {
+            overflow-x: hidden !important;
+            overflow-y: auto !important; /* ensure scrolling works */
+        }
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .bg-wrap {
+            max-width: 100vw !important;
+            max-height: 100vh !important;
+            overflow: hidden !important;
+        }
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 10px !important;
+            }
+            .profile-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.1));
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="waves" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M0 10 Q5 5 10 10 T20 10" stroke="rgba(0,212,255,0.1)" fill="none" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23waves)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 20px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+        
+        .profile-avatar .edit-icon {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .profile-avatar:hover .edit-icon {
+            opacity: 1;
+        }
+        
+        .profile-name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .profile-email {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        
+        .profile-bio {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .profile-stat {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .profile-stat:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
+        }
+        
+        .profile-stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+        
+        .profile-stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .profile-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .profile-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .section-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+        }
+        
+        .upload-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        
+        .upload-info {
+            flex: 1;
+        }
+        
+        .upload-species {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 5px;
+        }
+        
+        .upload-date {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        .upload-confidence {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+        
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .edit-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .edit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-label {
+            color: white;
+            font-weight: 600;
+        }
+        
+        .form-input {
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+        
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .achievement-card {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .achievement-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+        }
+        
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .achievement-title {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .achievement-desc {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #0099cc);
+            transition: width 0.3s ease;
+        }
+        
+        .level-indicator {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: scale(1.1);
+        }
+        
+        .theme-icon {
+            transition: transform 0.3s ease;
+        }
+        
+        .dark-mode .theme-icon {
+            transform: rotate(180deg);
+        }
+        
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-name {
+                font-size: 2rem;
+            }
+            
+            .profile-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background video (disabled by global CSS, overlay kept for dark-blue bg) -->
+    <div class="bg-wrap">
+        <video autoplay muted loop class="bg-video">
+            <source src="{{ url_for('static', filename='assets/underwater.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+        <canvas id="dust-canvas"></canvas>
+    </div>
+    
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/map">Map</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile" class="active">Profile</a>
+            <a href="/logout">Logout</a>
+            <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Profile Content -->
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar" onclick="openEditModal()">
+                {{ user.username[0].upper() if user.username else 'U' }}
+                <div class="edit-icon">✏️</div>
+                <div class="level-indicator">{{ (total_uploads // 10) + 1 }}</div>
+            </div>
+            <h1 class="profile-name">{{ user.username }}</h1>
+            <p class="profile-email">{{ user.email }}</p>
+            <p class="profile-bio" id="userBio">
+                {% if user.bio %}
+                    {{ user.bio }}
+                {% else %}
+                    🌊 Passionate marine explorer and conservation enthusiast. Let's discover the ocean together!
+                {% endif %}
+            </p>
+            
+            <div class="profile-stats">
+                <div class="profile-stat" onclick="showStatsDetails('uploads')">
+                    <div class="profile-stat-number">{{ total_uploads }}</div>
+                    <div class="profile-stat-label">Total Uploads</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ [total_uploads * 10, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="profile-stat" onclick="showStatsDetails('species')">
+                    <div class="profile-stat-number">{{ unique_species }}</div>
+                    <div class="profile-stat-label">Unique Species</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ [unique_species * 20, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="profile-stat" onclick="showStatsDetails('recent')">
+                    <div class="profile-stat-number">{{ uploads|length }}</div>
+                    <div class="profile-stat-label">Recent Uploads</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ [uploads|length * 25, 100]|min }}%"></div>
+                    </div>
+                </div>
+                <div class="profile-stat" onclick="showStatsDetails('accuracy')">
+                    <div class="profile-stat-number">89%</div>
+                    <div class="profile-stat-label">Accuracy Rate</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 89%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <button class="profile-btn" onclick="openEditModal()">
+                    ✏️ Edit Profile
+                </button>
+                <a href="/" class="profile-btn secondary">
+                    🔍 New Identification
+                </a>
+                <button class="profile-btn secondary" onclick="shareProfile()">
+                    📤 Share Profile
+                </button>
+                <button class="profile-btn secondary" onclick="startOceanGame()">
+                    🎮 Ocean Game
+                </button>
+            </div>
+        </div>
+        
+        <div class="profile-grid">
+            <div class="main-content">
+                <!-- Recent Uploads -->
+                <div class="section-card">
+                    <h2 class="section-title">📷 Recent Identifications</h2>
+                    {% if uploads %}
+                        {% for upload in uploads %}
+                        <div class="upload-item" onclick="viewUploadDetails('{{ upload.id }}')">
+                            <img src="{{ url_for('uploaded_file', filename=upload.filename) }}" 
+                                 alt="{{ upload.species_name }}" class="upload-image">
+                            <div class="upload-info">
+                                <div class="upload-species">{{ upload.species_name }}</div>
+                                <div class="upload-date">{{ upload.upload_date.strftime('%B %d, %Y') }}</div>
+                            </div>
+                            <div class="upload-confidence">{{ upload.confidence }}%</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="color: rgba(255,255,255,0.7); text-align: center; padding: 20px;">
+                            No uploads yet. Start by identifying your first marine species! 🐠
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Achievements -->
+                <div class="section-card">
+                    <h2 class="section-title">🏆 Achievements & Badges</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div class="achievement-card" onclick="showAchievementDetails('first_discovery')">
+                            <div class="achievement-icon">🥇</div>
+                            <div class="achievement-title">First Discovery</div>
+                            <div class="achievement-desc">Identified your first species</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ [total_uploads * 10, 100]|min }}%"></div>
+                            </div>
+                        </div>
+                        <div class="achievement-card" onclick="showAchievementDetails('species_explorer')">
+                            <div class="achievement-icon">🔬</div>
+                            <div class="achievement-title">Species Explorer</div>
+                            <div class="achievement-desc">Found {{ unique_species }} unique species</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ [unique_species * 20, 100]|min }}%"></div>
+                            </div>
+                        </div>
+                        <div class="achievement-card" onclick="showAchievementDetails('ocean_guardian')">
+                            <div class="achievement-icon">🌊</div>
+                            <div class="achievement-title">Ocean Guardian</div>
+                            <div class="achievement-desc">Contributing to conservation</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ [total_uploads * 5, 100]|min }}%"></div>
+                            </div>
+                        </div>
+                        <div class="achievement-card" onclick="showAchievementDetails('accuracy_master')">
+                            <div class="achievement-icon">🎯</div>
+                            <div class="achievement-title">Accuracy Master</div>
+                            <div class="achievement-desc">High identification accuracy</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 89%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Marine Conservation Impact -->
+                <div class="section-card">
+                    <h2 class="section-title">🌍 Conservation Impact</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div style="text-align: center; padding: 20px; background: rgba(34, 197, 94, 0.1); border-radius: 12px; border: 1px solid rgba(34, 197, 94, 0.3);">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">🌱</div>
+                            <div style="color: white; font-weight: 600; margin-bottom: 5px;">Carbon Offset</div>
+                            <div style="color: #22c55e; font-size: 1.5rem; font-weight: 700;">{{ total_uploads * 0.5 }}kg</div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">CO₂ saved</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: rgba(59, 130, 246, 0.1); border-radius: 12px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">🐠</div>
+                            <div style="color: white; font-weight: 600; margin-bottom: 5px;">Species Protected</div>
+                            <div style="color: #3b82f6; font-size: 1.5rem; font-weight: 700;">{{ unique_species }}</div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Marine species</div>
+                        </div>
+                        <div style="text-align: center; padding: 20px; background: rgba(168, 85, 247, 0.1); border-radius: 12px; border: 1px solid rgba(168, 85, 247, 0.3);">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">🌊</div>
+                            <div style="color: white; font-weight: 600; margin-bottom: 5px;">Ocean Health</div>
+                            <div style="color: #a855f7; font-size: 1.5rem; font-weight: 700;">+{{ total_uploads * 2 }}%</div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Contribution</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <!-- Quick Actions -->
+                <div class="section-card">
+                    <h2 class="section-title">⚡ Quick Actions</h2>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <a href="/species_explorer" class="profile-btn secondary">
+                            🔬 Species Explorer
+                        </a>
+                        <a href="/ocean_map" class="profile-btn secondary">
+                            🗺️ View Ocean Map
+                        </a>
+                        <a href="/export_data" class="profile-btn secondary" target="_blank">
+                            📊 Export Data
+                        </a>
+                        <a href="/conservation" class="profile-btn secondary">
+                            🌱 Conservation Challenge
+                        </a>
+                        <a href="/ocean_stickers" class="profile-btn secondary">
+                            🌟 Ocean Stickers
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Marine Tips -->
+                <div class="section-card">
+                    <h2 class="section-title">💡 Marine Tips</h2>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border-left: 4px solid #00d4ff;">
+                            <div style="color: #00d4ff; font-weight: 600; margin-bottom: 5px;">🌊 Best Time to Dive</div>
+                            <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Early morning and late afternoon provide the best visibility for marine photography.</div>
+                        </div>
+                        <div style="padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border-left: 4px solid #22c55e;">
+                            <div style="color: #22c55e; font-weight: 600; margin-bottom: 5px;">🐠 Species Behavior</div>
+                            <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Many fish are more active during feeding times - dawn and dusk.</div>
+                        </div>
+                        <div style="padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border-left: 4px solid #f59e0b;">
+                            <div style="color: #f59e0b; font-weight: 600; margin-bottom: 5px;">📸 Photography Tips</div>
+                            <div style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Use natural light and avoid flash to capture authentic marine life behavior.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Profile Modal -->
+    <div class="edit-modal" id="editModal">
+        <div class="edit-modal-content">
+            <h2 style="color: white; margin-bottom: 20px;">✏️ Edit Profile</h2>
+            <form class="edit-form" id="editForm">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-input" id="editUsername" value="{{ user.username }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="editEmail" value="{{ user.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Bio</label>
+                    <textarea class="form-input form-textarea" id="editBio" placeholder="Tell us about your marine exploration journey...">{{ user.bio or '' }}</textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="profile-btn secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="profile-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <footer> 2025 AquaTrace AI — Empowering Ocean Conservation 🌊 | <span style="color: #00d4ff; text-shadow: 0 0 10px rgba(0,212,255,0.6);">Made by Aashna</span></footer>
+    
+    <script>
+        // Theme Management
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            if (currentTheme === 'light') {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                currentTheme = 'dark';
+                themeIcon.textContent = '☀️';
+            } else {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                currentTheme = 'light';
+                themeIcon.textContent = '🌙';
+            }
+            
+            localStorage.setItem('theme', currentTheme);
+        }
+        
+        // Initialize theme
+        function initTheme() {
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            if (currentTheme === 'dark') {
+                body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+            } else {
+                body.classList.add('light-mode');
+                themeIcon.textContent = '🌙';
+            }
+        }
+        
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', initTheme);
+        
+        // Global variables
+        let totalUploads = {{ total_uploads }};
+        let uniqueSpecies = {{ unique_species }};
+        
+        // Edit Profile Modal Functions
+        function openEditModal() {
+            document.getElementById('editModal').style.display = 'block';
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('editUsername').value,
+                email: document.getElementById('editEmail').value,
+                bio: document.getElementById('editBio').value
+            };
+            
+            // Send data to backend
+            fetch('/update_profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the UI
+                    document.querySelector('.profile-name').textContent = formData.username;
+                    document.querySelector('.profile-email').textContent = formData.email;
+                    document.getElementById('userBio').textContent = formData.bio;
+                    
+                    // Update avatar initial
+                    document.querySelector('.profile-avatar').textContent = formData.username[0].toUpperCase();
+                    
+                    closeEditModal();
+                    showNotification('Profile updated successfully! 🎉', 'success');
+                } else {
+                    showNotification('Error updating profile: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error updating profile. Please try again.', 'error');
+            });
+        });
+        
+        // Action Functions
+        function shareProfile() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Check out my marine discoveries!',
+                    text: `I've identified ${totalUploads} marine species on AquaTrace AI!`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href);
+                showNotification('Profile link copied to clipboard! 📋', 'success');
+            }
+        }
+        
+        function startOceanGame() {
+            showNotification('Starting Ocean Cleanup Challenge... 🧹', 'info');
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 1500);
+        }
+        
+        function viewMap() {
+            window.location.href = '/map';
+        }
+        
+        function exportData() {
+            showNotification('Preparing your data export... 📊', 'info');
+            setTimeout(() => {
+                showNotification('Data exported successfully! 📁', 'success');
+            }, 2000);
+        }
+        
+        function openSettings() {
+            showNotification('Settings panel coming soon! ⚙️', 'info');
+        }
+        
+        function startConservationChallenge() {
+            showNotification('Starting Conservation Challenge... 🌱', 'info');
+            setTimeout(() => {
+                showNotification('Challenge started! Complete tasks to earn rewards! 🏆', 'success');
+            }, 1500);
+        }
+        
+        function viewMarineNews() {
+            showNotification('Loading latest marine conservation news... 📰', 'info');
+            setTimeout(() => {
+                showNotification('News loaded! Check out the latest updates! 📖', 'success');
+            }, 2000);
+        }
+        
+        function showStatsDetails(type) {
+            const messages = {
+                'uploads': `You've uploaded ${totalUploads} images for species identification!`,
+                'species': `You've discovered ${uniqueSpecies} unique marine species!`,
+                'recent': `You've made ${uploads.length} recent identifications!`,
+                'accuracy': 'Your identification accuracy is 89% - excellent work!'
+            };
+            showNotification(messages[type], 'info');
+        }
+        
+        function viewUploadDetails(uploadId) {
+            showNotification(`Viewing details for upload ${uploadId}... 🔍`, 'info');
+        }
+
+        function showAchievementDetails(achievement) {
+            const achievements = {
+                'first_discovery': 'First Discovery: You identified your first marine species! 🥇',
+                'species_explorer': `Species Explorer: You've found ${uniqueSpecies} unique species! 🔬`,
+                'ocean_guardian': 'Ocean Guardian: You\'re contributing to marine conservation! 🌊',
+                'accuracy_master': 'Accuracy Master: Your identification skills are exceptional! 🎯'
+            };
+            showNotification(achievements[achievement], 'success');
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(34, 197, 94, 0.9)' : 
+                           type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 
+                           'rgba(0, 212, 255, 0.9)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                z-index: 1001;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                animation: slideIn 0.3s ease;
+                max-width: 300px;
+                word-wrap: break-word;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Add hover effects and animations
+        document.querySelectorAll('.profile-stat').forEach(stat => {
+            stat.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+                this.style.animation = 'pulse 1s infinite';
+            });
+            
+            stat.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+                this.style.animation = 'none';
+            });
+        });
+        
+        // Add click effects to achievement cards
+        document.querySelectorAll('.achievement-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-5px)';
+                }, 150);
+            });
+        });
+        
+        // Real-time updates simulation
+        setInterval(() => {
+            // Simulate occasional stat updates
+            if (Math.random() > 0.95) {
+                const stats = document.querySelectorAll('.profile-stat-number');
+                stats.forEach(stat => {
+                    const currentValue = parseInt(stat.textContent);
+                    if (currentValue < 100) {
+                        stat.textContent = currentValue + 1;
+                        stat.style.color = '#00ff88';
+                        setTimeout(() => {
+                            stat.style.color = '#00d4ff';
+                        }, 1000);
+                    }
+                });
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

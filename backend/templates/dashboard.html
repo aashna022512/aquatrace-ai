@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AquaTrace AI 🌊</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: transparent;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .dashboard-card {
+            background: transparent;
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, 0.15);
+            border-color: rgba(0, 212, 255, 0.4);
+            background: rgba(0, 212, 255, 0.12);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .card-icon {
+            font-size: 28px;
+            margin-right: 15px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            background: rgba(0, 212, 255, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 8px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+        
+        .stat-label {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        
+        .recent-activity {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .activity-item:hover {
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0 -15px;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 5px;
+            font-size: 1.05rem;
+        }
+        
+        .activity-time {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .conservation-tips {
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            backdrop-filter: blur(15px);
+        }
+        
+        .tip-item {
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tip-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+            padding: 18px 15px;
+            margin: 0 -15px;
+        }
+        
+        .tip-item:last-child {
+            border-bottom: none;
+        }
+        
+        .tip-title {
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .tip-description {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .chart-container {
+            height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 212, 255, 0.05);
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .quick-action-btn {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .quick-action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #00e5ff, #00b4cc);
+        }
+        
+        .action-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        
+        .action-text {
+            font-size: 1.1rem;
+        }
+        
+       
+        
+        /* Theme Management */
+        body {
+    overflow-x: hidden;
+    /* Use the solid dark background color from the Profile page's effective background */
+    background: #0d1a2d; 
+    margin: 0;
+    padding-top: 80px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    color: rgba(255, 255, 255, 0.95);
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        
+        .content h1 {
+            color: rgba(255, 255, 255, 0.98);
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            font-weight: 700;
+        }
+        
+        .content p {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .content {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Global text styling for shiny white text */
+        * {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: rgba(255, 255, 255, 0.98) !important;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        
+        p, span, div {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .dashboard-card * {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        /* Specific overrides for important elements */
+        .card-title {
+            color: #00d4ff !important;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+        
+        .stat-number {
+            color: #00d4ff !important;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+        
+        .tip-title {
+            color: #00d4ff !important;
+            text-shadow: 0 0 12px rgba(0, 212, 255, 0.3);
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        /* Navbar styles */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 60px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 43, 0.5);
+            backdrop-filter: blur(10px);
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+        }
+
+        .nav-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5em;
+            margin: 0;
+        }
+
+        .hamburger {
+            display: block;
+            position: relative;
+        }
+
+        .hamburger,
+        .hamburger::before,
+        .hamburger::after {
+            width: 2em;
+            height: 3px;
+            background: white;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger::before,
+        .hamburger::after {
+            content: '';
+            position: absolute;
+            left: 0;
+        }
+
+        .hamburger::before { top: -8px; }
+        .hamburger::after { bottom: -8px; }
+
+        .nav-toggle.nav-open .hamburger {
+            transform: rotate(45deg);
+        }
+
+        .nav-toggle.nav-open .hamburger::before {
+            transform: rotate(90deg) translate(8px);
+        }
+
+        .nav-toggle.nav-open .hamburger::after {
+            opacity: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 400;
+            font-size: 0.99rem;
+            letter-spacing: 1px;
+            font-family: inherit;
+            position: relative;
+            padding: 5px 0;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffffff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a.active {
+            font-weight: 600;
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+            background-color: #00d4ff;
+            box-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-toggle {
+                display: block;
+                z-index: 1001;
+            }
+
+            .nav-links {
+                position: fixed;
+                background: rgba(0, 0, 43, 0.95);
+                backdrop-filter: blur(10px);
+                top: 0;
+                right: 0;
+                width: 100%;
+                max-width: 300px;
+                height: 100vh;
+                padding: 6rem 2rem 2rem;
+                flex-direction: column;
+                gap: 1.5rem;
+                transform: translateX(100%);
+                transition: transform 0.3s ease-out;
+            }
+
+            .nav-links.nav-open {
+                transform: translateX(0);
+            }
+
+            .nav-links a {
+                font-size: 1.1rem;
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-links a::after {
+                display: none;
+            }
+
+            .nav-links a:hover {
+                color: #00d4ff;
+            }
+
+            /* Mobile Dashboard Layout */
+            .dashboard-container {
+                padding: 15px;
+                margin-top: 20px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .dashboard-card {
+                padding: 20px;
+                margin-bottom: 10px;
+            }
+
+            .card-header {
+                margin-bottom: 15px;
+            }
+
+            .card-icon {
+                font-size: 24px;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            /* Stats Grid - Single column on mobile */
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .stat-item {
+                padding: 15px;
+                text-align: center;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+                margin-bottom: 6px;
+            }
+
+            .stat-label {
+                font-size: 0.9rem;
+            }
+
+            /* Quick Actions - 2 columns on mobile */
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .quick-action-btn {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+
+            .action-icon {
+                font-size: 1.3rem;
+                margin-right: 8px;
+            }
+
+            .action-text {
+                font-size: 0.9rem;
+            }
+
+            /* Chart Container */
+            .chart-container {
+                height: 180px;
+                margin-top: 15px;
+            }
+
+            /* Activity Items */
+            .activity-item {
+                padding: 12px 0;
+            }
+
+            .activity-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            .activity-title {
+                font-size: 0.95rem;
+            }
+
+            .activity-time {
+                font-size: 0.8rem;
+            }
+
+            /* Tips */
+            .tip-item {
+                padding: 15px 0;
+            }
+
+            .tip-title {
+                font-size: 1rem;
+                margin-bottom: 8px;
+            }
+
+            .tip-description {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            /* Upload Results */
+            .upload-result {
+                padding: 15px;
+                margin-bottom: 10px;
+                background: rgba(0, 212, 255, 0.05);
+                border-radius: 10px;
+                border: 1px solid rgba(0, 212, 255, 0.2);
+            }
+
+            .upload-result h3 {
+                font-size: 1.1rem;
+                margin-bottom: 8px;
+            }
+
+            .upload-result p {
+                font-size: 0.9rem;
+                margin-bottom: 5px;
+            }
+
+            /* Ocean Health Index */
+            .ocean-health {
+                padding: 15px;
+            }
+
+            .ocean-health .stat-number {
+                font-size: 2.5rem;
+            }
+
+            /* Game Section */
+            .game-section {
+                padding: 15px;
+            }
+
+            /* Prevent horizontal overflow */
+            html, body {
+                overflow-x: hidden;
+                width: 100%;
+            }
+
+            .content {
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            /* Main heading */
+            .content h1 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+
+            .content p {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+
+            /* Footer */
+            footer {
+                font-size: 0.9rem;
+                padding: 15px;
+                text-align: center;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+
+            .dashboard-card {
+                padding: 15px;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-action-btn {
+                padding: 15px;
+                margin-bottom: 8px;
+            }
+
+            .stat-number {
+                font-size: 1.8rem;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+
+            .content h1 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background video -->
+    
+    
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}" {% if request.path == '/' %}class="active"{% endif %}>Home</a>
+            <a href="{{ url_for('about') }}" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
+            <a href="{{ url_for('map_page') }}" {% if request.path == '/map' %}class="active"{% endif %}>Map</a>
+            <a href="{{ url_for('dashboard') }}" {% if request.path == '/dashboard' %}class="active"{% endif %}>Dashboard</a>
+            <a href="{{ url_for('profile') }}" {% if request.path == '/profile' %}class="active"{% endif %}>Profile</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" {% if request.path == '/login' %}class="active"{% endif %}>Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <script>
+        // Hamburger menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.querySelector('.nav-toggle');
+            const navLinks = document.querySelector('.nav-links');
+
+            navToggle.addEventListener('click', function() {
+                navLinks.classList.toggle('nav-open');
+                navToggle.classList.toggle('nav-open');
+            });
+
+            // Close mobile menu when clicking on a link
+            navLinks.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('nav-open');
+                }
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!navToggle.contains(e.target) && !navLinks.contains(e.target)) {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('nav-open');
+                }
+            });
+        });
+    </script>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <div class="content">
+            <h1>🐠 Marine Analytics Dashboard</h1>
+            <p>Welcome back, {{ user.username }}! Here's your marine conservation journey overview.</p>
+            
+            <div class="dashboard-grid">
+                <!-- Statistics Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-icon">📊</div>
+                        <div class="card-title">Your Statistics</div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ total_uploads }}</div>
+                            <div class="stat-label">Total Uploads</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ unique_species }}</div>
+                            <div class="stat-label">Unique Species</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">{{ uploads|length }}</div>
+                            <div class="stat-label">Recent Uploads</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">89%</div>
+                            <div class="stat-label">Accuracy Rate</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-icon">🕒</div>
+                        <div class="card-title">Recent Activity</div>
+                    </div>
+                    <div class="recent-activity">
+                        {% if uploads %}
+                            {% for upload in uploads %}
+                            <div class="activity-item">
+                                <div class="activity-icon">🐠</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">{{ upload.species_name }} Identified</div>
+                                    <div class="activity-time">{{ upload.upload_date.strftime('%B %d, %Y') }}</div>
+                                    <div class="activity-details">Confidence: {{ upload.confidence }}%</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="activity-item">
+                                <div class="activity-icon">📷</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">No uploads yet</div>
+                                    <div class="activity-time">Start by uploading your first image!</div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Conservation Tips -->
+                <div class="dashboard-card conservation-tips">
+                    <div class="card-header">
+                        <div class="card-icon">🌱</div>
+                        <div class="card-title">Conservation Tips</div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-title">Reduce Plastic Use</div>
+                        <div class="tip-description">Plastic pollution is a major threat to marine life. Use reusable bags and bottles.</div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-title">Choose Sustainable Seafood</div>
+                        <div class="tip-description">Look for MSC or ASC certified products to support sustainable fishing practices.</div>
+                    </div>
+                    <div class="tip-item">
+                        <div class="tip-title">Support Marine Protected Areas</div>
+                        <div class="tip-description">These areas help preserve critical habitats and allow species to recover.</div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-icon">⚡</div>
+                        <div class="card-title">Quick Actions</div>
+                    </div>
+                    <div class="quick-actions">
+                        <a href="/species_explorer" class="quick-action-btn">
+                            <span class="action-icon">🔬</span>
+                            <span class="action-text">Species Explorer</span>
+                        </a>
+                        <a href="/ocean_map" class="quick-action-btn">
+                            <span class="action-icon">🗺️</span>
+                            <span class="action-text">View Ocean Map</span>
+                        </a>
+                        <a href="/export_data" class="quick-action-btn" target="_blank">
+                            <span class="action-icon">📊</span>
+                            <span class="action-text">Export Data</span>
+                        </a>
+                        <a href="/conservation" class="quick-action-btn">
+                            <span class="action-icon">🌱</span>
+                            <span class="action-text">Conservation Challenge</span>
+                        </a>
+                        <a href="/ocean_stickers" class="quick-action-btn">
+                            <span class="action-icon">🌟</span>
+                            <span class="action-text">Ocean Stickers</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Species Distribution Chart -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-icon">📈</div>
+                        <div class="card-title">Real-Time Species Distribution</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="speciesChart" width="400" height="200"></canvas>
+                    </div>
+                    <div id="chartLegend" style="margin-top: 15px; text-align: center; color: rgba(255,255,255,0.8); font-size: 0.9rem;"></div>
+                    <div id="realTimeStats" style="margin-top: 15px; text-align: center; font-size: 0.9rem; color: #00d4ff;">
+                        <div style="margin-bottom: 5px;">🔄 Live Updates</div>
+                        <div id="lastUpdate">Last update: Just now</div>
+                    </div>
+                </div>
+                
+                <!-- Ocean Health Index -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-icon">🌊</div>
+                        <div class="card-title">Ocean Health Index</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">🌍</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: #00d4ff; margin-bottom: 10px;">72/100</div>
+                        <div style="color: rgba(255,255,255,0.8); margin-bottom: 15px;">Global Ocean Health Score</div>
+                        <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #00d4ff, #0099cc); height: 100%; width: 72%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Marine Conservation Game -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-icon">🌊</div>
+                        <div class="card-title">Ocean Cleanup Challenge</div>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="font-size: 2rem; margin-bottom: 15px;">🧹</div>
+                        <div style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">Help clean the ocean by removing plastic waste!</div>
+                        <button onclick="startOceanCleanup()" class="action-btn" style="width: 100%; margin-bottom: 15px;">Start Cleanup</button>
+                        <div id="gameStats" style="display: none;">
+                            <div style="color: #00d4ff; font-weight: 600; margin-bottom: 10px;">Plastic Removed: <span id="gameScore">0</span></div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.9rem;">Time: <span id="gameTime">0</span>s</div>
+                            <div id="progressBarContainer" style="background:rgba(255,255,255,0.1);height:10px;border-radius:5px;overflow:hidden;margin-top:10px;">
+                                <div id="progressBar" style="background:linear-gradient(90deg,#00d4ff,#0099cc);height:100%;width:100%;transition:width 0.2s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Results -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <div class="card-icon">📊</div>
+                        <div class="card-title">Upload Results</div>
+                    </div>
+                    <div class="upload-results">
+                        {% if uploads %}
+                            {% for upload in uploads %}
+                            <div class="upload-result">
+                                <h3>{{ upload.species_name }}</h3>
+                                <p>Confidence: {{ upload.confidence }}%</p>
+                                <p>Date: {{ upload.upload_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                                <a href="/species_map/{{ upload.species_name }}" class="map-btn" target="_blank">
+                                    🗺️ View Distribution Map
+                                </a>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="upload-result">
+                                <h3>No Uploads Yet</h3>
+                                <p>Start by uploading your first image!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer> 2025 AquaTrace AI — Empowering Ocean Conservation 🌊</footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Auto-hide flash messages and welcome messages after 1 minute
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                // Auto-hide after 60 seconds (1 minute)
+                setTimeout(function() {
+                    message.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(100%)';
+                    setTimeout(function() {
+                        if (message.parentNode) {
+                            message.parentNode.removeChild(message);
+                        }
+                    }, 500);
+                }, 60000); // 60 seconds
+            });
+        });
+
+        // Real-time species distribution chart
+        let speciesChart;
+        let chartUpdateInterval;
+        
+        function initSpeciesChart() {
+            const ctx = document.getElementById('speciesChart').getContext('2d');
+            
+            // Sample data - in real app, this would come from your database
+            const chartData = {
+                labels: ['Clownfish', 'Tangs', 'Sharks', 'Turtles', 'Dolphins', 'Others'],
+                datasets: [{
+                    data: [35, 25, 15, 10, 8, 7],
+                    backgroundColor: [
+                        '#FF6B6B', '#4ECDC4', '#45B7D1', 
+                        '#96CEB4', '#FFEAA7', '#DDA0DD'
+                    ],
+                    borderWidth: 2,
+                    borderColor: 'rgba(255, 255, 255, 0.3)'
+                }]
+            };
+            
+            speciesChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true
+                    }
+                }
+            });
+            
+            updateChartLegend();
+            startRealTimeUpdates();
+        }
+        
+        function updateChartLegend() {
+            const legend = document.getElementById('chartLegend');
+            const data = speciesChart.data.datasets[0].data;
+            const labels = speciesChart.data.labels;
+            const colors = speciesChart.data.datasets[0].backgroundColor;
+            
+            let legendHTML = '';
+            for (let i = 0; i < labels.length; i++) {
+                legendHTML += `
+                    <span style="display: inline-flex; align-items: center; margin: 5px; padding: 8px 12px; background: rgba(0, 212, 255, 0.1); border-radius: 20px; font-size: 0.85rem; color: rgba(255,255,255,0.9); border: 1px solid rgba(0, 212, 255, 0.2);">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: ${colors[i]}; border-radius: 50%; margin-right: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></span>
+                        ${labels[i]}: ${data[i]}%
+                    </span>
+                `;
+            }
+            legend.innerHTML = legendHTML;
+        }
+        
+        function startRealTimeUpdates() {
+            chartUpdateInterval = setInterval(() => {
+                // Simulate real-time data updates
+                const newData = speciesChart.data.datasets[0].data.map(value => {
+                    // Add some random variation to simulate real-time changes
+                    return Math.max(0, Math.min(100, value + (Math.random() - 0.5) * 2));
+                });
+                
+                // Normalize to 100%
+                const total = newData.reduce((sum, val) => sum + val, 0);
+                const normalizedData = newData.map(val => Math.round((val / total) * 100));
+                
+                speciesChart.data.datasets[0].data = normalizedData;
+                speciesChart.update('active');
+                updateChartLegend();
+                
+                // Update timestamp
+                const now = new Date();
+                document.getElementById('lastUpdate').textContent = 
+                    `Last update: ${now.toLocaleTimeString()}`;
+            }, 5000); // Update every 5 seconds
+        }
+        
+        // Add some interactivity to the dashboard
+        document.querySelectorAll('.dashboard-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+        
+        // Simulate real-time updates
+        setInterval(() => {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(stat => {
+                if (Math.random() > 0.95) {
+                    const currentValue = parseInt(stat.textContent);
+                    stat.textContent = currentValue + 1;
+                    stat.style.color = '#00ff88';
+                    setTimeout(() => {
+                        stat.style.color = '#00d4ff';
+                    }, 1000);
+                }
+            });
+        }, 5000);
+        
+        // Ocean Cleanup Game Variables
+        let gameActive = false;
+        let gameScore = 0;
+        let gameTime = 0;
+        let gameTimer;
+        let plasticItems = [];
+        
+        // --- Ocean Cleanup Game Enhancements ---
+        let popSound;
+        if (!window.soundsLoaded) {
+            popSound = new Audio('/static/assets/pop.mp3');
+            window.soundsLoaded = true;
+        }
+        function startOceanCleanup() {
+            if (gameActive) return;
+            gameActive = true;
+            gameScore = 0;
+            gameTime = 0;
+            plasticItems = [];
+            totalTime = 30; // 30 seconds challenge
+            document.getElementById('gameScore').textContent = gameScore;
+            document.getElementById('gameTime').textContent = gameTime;
+            document.getElementById('gameStats').style.display = 'block';
+            updateProgressBar();
+            // Start timer
+            gameTimer = setInterval(() => {
+                gameTime++;
+                document.getElementById('gameTime').textContent = gameTime;
+                updateProgressBar();
+                if (gameTime >= totalTime) gameOver();
+            }, 1000);
+            // Create game area
+            createGameArea();
+            // Start spawning plastic and special items
+            spawnPlastic();
+            spawnBonusOrDanger();
+        }
+        function updateProgressBar() {
+            const percent = 100 - (gameTime / totalTime) * 100;
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+        
+        function createGameArea() {
+            // Create game container
+            const gameContainer = document.createElement('div');
+            gameContainer.id = 'gameContainer';
+            gameContainer.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(180deg, #006994 0%, #004d73 50%, #002b42 100%);
+                z-index: 1000;
+                overflow: hidden;
+            `;
+            
+            // Add ocean background elements
+            const oceanBg = document.createElement('div');
+            oceanBg.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="waves" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M0 10 Q5 5 10 10 T20 10" stroke="rgba(255,255,255,0.1)" fill="none" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23waves)"/></svg>');
+                opacity: 0.3;
+            `;
+            gameContainer.appendChild(oceanBg);
+            
+            // Add instructions
+            const instructions = document.createElement('div');
+            instructions.style.cssText = `
+                position: absolute;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-size: 1.1rem;
+                z-index: 1001;
+            `;
+            instructions.textContent = 'Click on plastic items to remove them from the ocean!';
+            gameContainer.appendChild(instructions);
+            
+            // Add close button
+            const closeBtn = document.createElement('button');
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(239, 68, 68, 0.8);
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 1rem;
+                z-index: 1001;
+            `;
+            closeBtn.textContent = 'Exit Game';
+            closeBtn.onclick = gameOver;
+            gameContainer.appendChild(closeBtn);
+            
+            document.body.appendChild(gameContainer);
+        }
+        
+        function spawnPlastic() {
+            if (!gameActive) return;
+            const plasticTypes = ['🥤', '🍶', '🛍️', '🥄', '🍴', '🧃', '🧴', '📦'];
+            const gameContainer = document.getElementById('gameContainer');
+            const plastic = document.createElement('div');
+            plastic.style.cssText = `
+                position: absolute;
+                font-size: 2rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                z-index: 1001;
+            `;
+            plastic.textContent = plasticTypes[Math.floor(Math.random() * plasticTypes.length)];
+            plastic.style.left = Math.random() * 80 + 10 + '%';
+            plastic.style.top = Math.random() * 60 + 20 + '%';
+            plastic.addEventListener('click', () => {
+                gameScore += 10;
+                document.getElementById('gameScore').textContent = gameScore;
+                if (popSound) popSound.currentTime = 0;
+                if (popSound) popSound.play();
+                plastic.style.transform = 'scale(0) rotate(180deg)';
+                plastic.style.opacity = '0';
+                setTimeout(() => {
+                    gameContainer.removeChild(plastic);
+                }, 300);
+                showMessage('+10 points! 🎉', 'success');
+            });
+            plastic.addEventListener('mouseenter', () => {
+                plastic.style.transform = 'scale(1.2)';
+            });
+            plastic.addEventListener('mouseleave', () => {
+                plastic.style.transform = 'scale(1)';
+            });
+            gameContainer.appendChild(plastic);
+            plasticItems.push(plastic);
+            setTimeout(spawnPlastic, 2000 + Math.random() * 3000);
+        }
+        // Spawn bonus or danger items
+        function spawnBonusOrDanger() {
+            if (!gameActive) return;
+            const gameContainer = document.getElementById('gameContainer');
+            // 50% chance for bonus, 50% for danger
+            const isBonus = Math.random() < 0.5;
+            const item = document.createElement('div');
+            item.style.cssText = `
+                position: absolute;
+                font-size: 2.2rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                z-index: 1002;
+                filter: drop-shadow(0 0 8px #00d4ff);
+            `;
+            if (isBonus) {
+                item.textContent = '🐢'; // Bonus: Turtle
+                item.title = 'Bonus! Save the turtle!';
+                item.addEventListener('click', () => {
+                    gameScore += 30;
+                    document.getElementById('gameScore').textContent = gameScore;
+                    if (popSound) popSound.currentTime = 0;
+                    if (popSound) popSound.play();
+                    item.style.transform = 'scale(0) rotate(-180deg)';
+                    item.style.opacity = '0';
+                    setTimeout(() => {
+                        gameContainer.removeChild(item);
+                    }, 300);
+                    showMessage('+30 bonus! 🐢', 'success');
+                });
+            } else {
+                item.textContent = '🪼'; // Danger: Jellyfish
+                item.title = 'Danger! Don\'t click!';
+                item.addEventListener('click', () => {
+                    gameScore -= 20;
+                    if (gameScore < 0) gameScore = 0;
+                    document.getElementById('gameScore').textContent = gameScore;
+                    if (popSound) popSound.currentTime = 0;
+                    if (popSound) popSound.play();
+                    item.style.transform = 'scale(0) rotate(180deg)';
+                    item.style.opacity = '0';
+                    setTimeout(() => {
+                        gameContainer.removeChild(item);
+                    }, 300);
+                    showMessage('-20! Ouch! 🪼', 'danger');
+                });
+            }
+            item.style.left = Math.random() * 80 + 10 + '%';
+            item.style.top = Math.random() * 60 + 20 + '%';
+            gameContainer.appendChild(item);
+            setTimeout(() => {
+                if (item.parentNode) item.parentNode.removeChild(item);
+            }, 2000 + Math.random() * 2000);
+            setTimeout(spawnBonusOrDanger, 4000 + Math.random() * 2000);
+        }
+        
+        function gameOver() {
+            gameActive = false;
+            clearInterval(gameTimer);
+            
+            // Remove game container
+            const gameContainer = document.getElementById('gameContainer');
+            if (gameContainer) {
+                document.body.removeChild(gameContainer);
+            }
+            
+            // Clear plastic items
+            plasticItems.forEach(item => {
+                if (item.parentNode) {
+                    item.parentNode.removeChild(item);
+                }
+            });
+            plasticItems = [];
+            
+            showMessage(`Cleanup Complete! You removed ${gameScore} pieces of plastic! 🌊`, 'success');
+            
+            setTimeout(() => {
+                document.getElementById('gameStats').style.display = 'none';
+            }, 3000);
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: ${type === 'success' ? 'rgba(34, 197, 94, 0.9)' : 'rgba(239, 68, 68, 0.9)'};
+                color: white;
+                padding: 20px 30px;
+                border-radius: 15px;
+                font-size: 1.2rem;
+                font-weight: 600;
+                z-index: 1001;
+                text-align: center;
+            `;
+            messageDiv.textContent = message;
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(messageDiv);
+            }, 2000);
+        }
+        
+        // Add CSS for pulse animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize chart when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initSpeciesChart();
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (chartUpdateInterval) {
+                clearInterval(chartUpdateInterval);
+            }
+        });
+    </script>
+
+</body>
+</html>

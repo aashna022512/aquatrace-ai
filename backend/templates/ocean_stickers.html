@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Stickers Game - AquaTrace AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        body { 
+            padding-top: 80px; 
+            overflow-x: hidden; 
+        }
+        
+        .wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        /* Enhanced dark overlay */
+        .bg-overlay {
+            background: rgba(5, 15, 35, 0.92) !important;
+        }
+        
+        /* Game Section */
+        .game-section {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border: 3px solid rgba(0, 212, 255, 0.4);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2);
+        }
+        
+        .game-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .game-title {
+            color: #00d4ff;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .game-description {
+            color: #e1f5fe;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Challenge Box */
+        .challenge-box {
+            background: linear-gradient(135deg, rgba(0, 50, 100, 0.6), rgba(0, 25, 50, 0.8));
+            border: 3px solid rgba(0, 212, 255, 0.6);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
+        }
+        
+        .challenge-text {
+            font-size: 1.8em;
+            color: #00d4ff;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .challenge-instruction {
+            color: #b3e5fc;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        
+        .score-display {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .score-item {
+            background: rgba(0, 30, 60, 0.4);
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            margin: 10px;
+        }
+        
+        .score-label {
+            color: #b3e5fc;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            color: #00d4ff;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        
+        /* Stickers Grid */
+        .stickers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+            position: relative;
+            z-index: 2;
+        }
+       
+        .sticker-item {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .sticker-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .sticker-item:hover::before {
+            left: 100%;
+        }
+        
+        .sticker-item:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.4);
+            border-color: rgba(0, 212, 255, 0.6);
+        }
+        
+        .sticker-item.correct {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(69, 160, 73, 0.2));
+            animation: correctPulse 0.6s ease;
+        }
+        
+        .sticker-item.incorrect {
+            border-color: #f44336;
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.3), rgba(229, 57, 53, 0.2));
+            animation: shake 0.6s ease;
+        }
+        
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .sticker-emoji {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            display: block;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+        }
+        
+        .sticker-name {
+            color: #e1f5fe;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        /* Drop Zone */
+        .drop-zone {
+            min-height: 200px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 153, 204, 0.08));
+            border: 3px dashed rgba(0, 212, 255, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.drag-over {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 153, 204, 0.15));
+            border-color: rgba(0, 212, 255, 0.6);
+            transform: scale(1.02);
+        }
+        
+        .drop-zone-text {
+            color: #b3e5fc;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        
+        .dropped-sticker {
+            display: inline-block;
+            font-size: 3rem;
+            margin: 10px;
+            padding: 15px;
+            background: rgba(0, 30, 60, 0.4);
+            border-radius: 15px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+        
+        .dropped-sticker:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+        }
+        
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            font-size: 1.1em;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+        
+        /* Feedback Messages */
+        .feedback-message {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1.1em;
+            z-index: 3000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .feedback-correct {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+            color: white;
+        }
+        
+        .feedback-incorrect {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Enhanced Mobile Responsive */
+        @media (max-width: 768px) {
+            .wrap {
+                padding: 15px;
+            }
+            
+            .game-section {
+                padding: 25px 20px;
+                margin-bottom: 25px;
+            }
+            
+            .game-title {
+                font-size: 2em;
+                margin-bottom: 15px;
+            }
+            
+            .game-description {
+                font-size: 1.1em;
+                margin-bottom: 20px;
+            }
+            
+            .challenge-box {
+                padding: 20px;
+                margin: 20px 0;
+            }
+            
+            .challenge-text {
+                font-size: 1.4em;
+                margin-bottom: 10px;
+            }
+            
+            .challenge-instruction {
+                font-size: 1em;
+                margin-bottom: 15px;
+            }
+            
+            .score-display {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .score-item {
+                width: 100%;
+                max-width: 200px;
+                padding: 12px 20px;
+            }
+            
+            .stickers-grid {
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+                gap: 8px;
+                margin: 20px 0;
+            }
+            
+            .sticker-item {
+                padding: 12px;
+            }
+            
+            .sticker-emoji {
+                font-size: 2.2rem;
+                margin-bottom: 8px;
+            }
+            
+            .sticker-name {
+                font-size: 0.85rem;
+            }
+            
+            .drop-zone {
+                min-height: 150px;
+                padding: 20px;
+                margin: 20px 0;
+            }
+            
+            .drop-zone-text {
+                font-size: 1.1em;
+                margin-bottom: 15px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 1em;
+                margin: 8px 5px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 10px;
+            }
+            
+            .game-section {
+                padding: 20px 15px;
+            }
+            
+            .game-title {
+                font-size: 1.8em;
+            }
+            
+            .challenge-text {
+                font-size: 1.2em;
+            }
+            
+            .stickers-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            
+            .sticker-item {
+                padding: 10px;
+            }
+            
+            .sticker-emoji {
+                font-size: 1.8rem;
+                margin-bottom: 6px;
+            }
+            
+            .sticker-name {
+                font-size: 0.8rem;
+            }
+            
+            .score-item {
+                padding: 10px 15px;
+            }
+            
+            .score-value {
+                font-size: 1.5em;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+                padding: 15px;
+            }
+        }
+        .drop-zone-text { transition: opacity 0.5s ease; }
+.drop-zone-text.fade-out { opacity: 0; }
+.drop-zone.selected {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.18), rgba(0, 153, 204, 0.12));
+    border-color: rgba(0, 212, 255, 0.7);
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+    </style>
+</head>
+<body>
+    <div class="bg-wrap">
+        <video autoplay muted loop class="bg-video">
+            <source src="{{ url_for('static', filename='assets/underwater.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+    </div>
+    
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/map">Map</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/ocean_stickers" class="active">Ocean Stickers</a>
+        </div>
+    </nav>
+
+    <div class="content wrap">
+        <h1 style="color: #00d4ff; margin-bottom: 20px; font-size: 2.5em;">🎨 Ocean Stickers Game</h1>
+        <p style="color: #e1f5fe; font-size: 1.2em; margin-bottom: 30px;">Match the sea creature names with the correct stickers! Drag and drop to play.</p>
+        
+                <!-- Game Section -->
+                <div class="game-section">
+                    <h2 class="game-title">🐠 Marine Life Matching Game</h2>
+                    <p class="game-description">Find the correct sticker for each sea creature name. Drag the matching sticker to the drop zone!</p>
+                    
+                    <!-- Challenge Box -->
+                    <div class="challenge-box">
+                        <div class="challenge-text" id="challengeText">Find: <span id="currentChallenge">Dolphin</span></div>
+                        <div class="challenge-instruction">Drag the matching sticker to the drop zone below!</div>
+                    </div>
+                        
+                    <!-- Score Display -->
+                    <div class="score-display">
+                        <div class="score-item">
+                            <div class="score-label">Score</div>
+                            <div class="score-value" id="score">0</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">Correct</div>
+                            <div class="score-value" id="correct">0</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">Wrong</div>
+                            <div class="score-value" id="wrong">0</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">Streak</div>
+                            <div class="score-value" id="streak">0</div>
+                        </div>
+                    </div>
+                
+                    <!-- Drop Zone -->
+                    <div class="drop-zone" id="dropZone">
+                        <div class="drop-zone-text">Drop the correct sticker here! 🎯</div>
+                        <div id="droppedStickers"></div>
+                    </div>
+                    
+                    <!-- Stickers Grid -->
+                    <div class="stickers-grid" id="stickersGrid">
+                        <!-- Stickers will be generated by JavaScript -->
+                    </div>
+            
+                    <!-- Game Controls -->
+                    <div class="game-controls" style="margin-top: 30px; text-align: center;">
+                        <button id="btnCheckAnswer" class="btn">✅ Check Answer</button>
+                        <button id="btnNewChallenge" class="btn btn-warning">🎲 New Challenge</button>
+                        <button id="btnResetGame" class="btn btn-success">♻️ Reset Game</button>
+                    </div>
+                </div>
+            </div>
+    </div>
+    
+    <footer> 2025 AquaTrace AI — Create your ocean! 🌊 | <span style="color: #00d4ff; text-shadow: 0 0 10px rgba(0,212,255,0.6); font-weight: 600;">Made by Aashna</span></footer>
+    
+    <script>
+        // Game state
+        let gameState = {
+            score: 0,
+            correct: 0,
+            wrong: 0,
+            streak: 0,
+            currentChallenge: '',
+            correctAnswer: '',
+            stickers: [
+                { name: 'Dolphin', emoji: '🐬' },
+                { name: 'Turtle', emoji: '🐢' },
+                { name: 'Shark', emoji: '🦈' },
+                { name: 'Octopus', emoji: '🐙' },
+                { name: 'Ray', emoji: '🐟' },
+                { name: 'Clownfish', emoji: '🐠' },
+                { name: 'Jellyfish', emoji: '🪼' },
+                { name: 'Starfish', emoji: '⭐' },
+                { name: 'Crab', emoji: '🦀' },
+                { name: 'Lobster', emoji: '🦞' },
+                { name: 'Squid', emoji: '🦑' },
+                { name: 'Pufferfish', emoji: '🐡' },
+                { name: 'Whale', emoji: '🐋' },
+                { name: 'Seal', emoji: '🦭' },
+                { name: 'Otter', emoji: '🦦' },
+                { name: 'Shell', emoji: '🐚' },
+                { name: 'Coral', emoji: '🪸' },
+                { name: 'Wave', emoji: '🌊' }
+            ],
+            selectedSticker: null
+        };
+        
+        // Fisher–Yates shuffle for uniform randomness
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        
+        // Load game state from localStorage
+        function loadGameState() {
+            const saved = localStorage.getItem('oceanStickersGame');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                gameState.score = savedState.score || 0;
+                gameState.correct = savedState.correct || 0;
+                gameState.wrong = savedState.wrong || 0;
+                gameState.streak = savedState.streak || 0;
+                gameState.currentChallenge = savedState.currentChallenge || '';
+            }
+        }
+        
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('oceanStickersGame', JSON.stringify({
+                score: gameState.score,
+                correct: gameState.correct,
+                wrong: gameState.wrong,
+                streak: gameState.streak,
+                currentChallenge: gameState.currentChallenge
+            }));
+        }
+        
+        // Generate stickers grid
+        function generateStickers() {
+            const grid = document.getElementById('stickersGrid');
+            grid.innerHTML = '';
+            
+            // Shuffle stickers
+            const shuffledStickers = shuffleArray([...gameState.stickers]);
+            
+            shuffledStickers.forEach(sticker => {
+                const stickerElement = document.createElement('div');
+                stickerElement.className = 'sticker-item';
+                stickerElement.draggable = true;
+                stickerElement.dataset.name = sticker.name;
+                stickerElement.dataset.emoji = sticker.emoji;
+                
+                stickerElement.innerHTML = `
+                    <span class="sticker-emoji">${sticker.emoji}</span>
+                    <div class="sticker-name">${sticker.name}</div>
+                `;
+                
+                // Add drag event listeners
+                stickerElement.addEventListener('dragstart', handleDragStart);
+                stickerElement.addEventListener('dragend', handleDragEnd);
+                stickerElement.addEventListener('click', () => selectSticker(sticker.name, sticker.emoji));
+                
+                grid.appendChild(stickerElement);
+            });
+        }
+        
+        // New challenge
+        function newChallenge() {
+            const randomIndex = Math.floor(Math.random() * gameState.stickers.length);
+            const challenge = gameState.stickers[randomIndex];
+            
+            gameState.currentChallenge = challenge.name;
+            gameState.correctAnswer = challenge.emoji;
+            
+            document.getElementById('currentChallenge').textContent = challenge.name;
+            
+            // Clear drop zone
+            document.getElementById('droppedStickers').innerHTML = '';
+            gameState.selectedSticker = null;
+            
+            // Reset drop zone text and highlight
+            const dzText = document.querySelector('.drop-zone-text');
+            dzText.classList.remove('fade-out');
+            dzText.textContent = 'Drop the correct sticker here! 🎯';
+            document.getElementById('dropZone').classList.remove('selected');
+            
+            // Reset sticker styles
+            document.querySelectorAll('.sticker-item').forEach(item => {
+                item.classList.remove('correct', 'incorrect');
+            });
+            
+            // Reset check button
+            const checkBtn = document.getElementById('btnCheckAnswer');
+            if (checkBtn) {
+                checkBtn.disabled = false;
+                checkBtn.textContent = '✅ Check Answer';
+            }
+        }
+        
+        // Select sticker
+        function selectSticker(name, emoji) {
+            gameState.selectedSticker = { name, emoji };
+            
+            // Update drop zone
+            const dropZone = document.getElementById('droppedStickers');
+            dropZone.innerHTML = `
+                <div class="dropped-sticker" data-name="${name}" data-emoji="${emoji}">
+                    ${emoji}
+                </div>
+            `;
+            
+            // Highlight and update drop zone text with fade
+            document.getElementById('dropZone').classList.add('selected');
+            const dzText2 = document.querySelector('.drop-zone-text');
+            dzText2.classList.remove('fade-out');
+            dzText2.textContent = `Selected: ${name} ${emoji}`;
+            setTimeout(() => dzText2.classList.add('fade-out'), 800);
+        }
+        
+        // Check answer
+        function checkAnswer() {
+            if (!gameState.selectedSticker) {
+                showFeedback('Please select a sticker first!', 'incorrect');
+                return;
+            }
+            
+            const isCorrect = gameState.selectedSticker.emoji === gameState.correctAnswer;
+            
+            if (isCorrect) {
+                gameState.correct++;
+                gameState.streak++;
+                const bonusCap = Math.min(gameState.streak, 5);
+                gameState.score += 10 + (bonusCap * 5);
+                showFeedback(`🎉 Correct! +${10 + (bonusCap * 5)} points! Streak: ${gameState.streak}`, 'correct');
+                
+                // Highlight correct sticker
+                document.querySelectorAll('.sticker-item').forEach(item => {
+                    if (item.dataset.emoji === gameState.correctAnswer) {
+                        item.classList.add('correct');
+                    }
+                });
+                
+                // Disable check button temporarily
+                const checkBtn = document.getElementById('btnCheckAnswer');
+                if (checkBtn) {
+                    checkBtn.disabled = true;
+                    checkBtn.textContent = '✅ Correct!';
+                }
+                
+                // Auto-advance after 2 seconds
+                setTimeout(() => {
+                    newChallenge();
+                    if (checkBtn) {
+                        checkBtn.disabled = false;
+                        checkBtn.textContent = '✅ Check Answer';
+                    }
+                }, 2000);
+                
+            } else {
+                gameState.wrong++;
+                gameState.streak = 0;
+                
+                showFeedback('❌ Wrong! Try again.', 'incorrect');
+                
+                // Highlight correct and wrong stickers
+                document.querySelectorAll('.sticker-item').forEach(item => {
+                    if (item.dataset.emoji === gameState.correctAnswer) {
+                        item.classList.add('correct');
+                    }
+                    if (item.dataset.emoji === gameState.selectedSticker.emoji) {
+                        item.classList.add('incorrect');
+                    }
+                });
+                
+                // Reset wrong sticker highlight after 1 second
+                setTimeout(() => {
+                    document.querySelectorAll('.sticker-item').forEach(item => {
+                        item.classList.remove('incorrect');
+                    });
+                }, 1000);
+            }
+            
+            updateScoreDisplay();
+            saveGameState();
+        }
+        
+        // Reset game
+        function resetGame() {
+            if (confirm('Are you sure you want to reset your progress?')) {
+                gameState.score = 0;
+                gameState.correct = 0;
+                gameState.wrong = 0;
+                gameState.streak = 0;
+                
+                updateScoreDisplay();
+                saveGameState();
+                newChallenge();
+                
+                showFeedback('Game reset!', 'correct');
+            }
+        }
+        
+        // Initialize game
+        function initGame() {
+            loadGameState();
+            generateStickers();
+            if (gameState.currentChallenge) {
+                const match = gameState.stickers.find(s => s.name === gameState.currentChallenge);
+                if (match) {
+                    gameState.correctAnswer = match.emoji;
+                    document.getElementById('currentChallenge').textContent = match.name;
+                } else {
+                    newChallenge();
+                }
+            } else {
+                newChallenge();
+            }
+            updateScoreDisplay();
+        }
+        
+        // Update score display
+        function updateScoreDisplay() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('correct').textContent = gameState.correct;
+            document.getElementById('wrong').textContent = gameState.wrong;
+            document.getElementById('streak').textContent = gameState.streak;
+        }
+        
+        // Show feedback message
+        function showFeedback(message, type) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback-message feedback-${type}`;
+            feedback.textContent = message;
+            
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => feedback.remove(), 300);
+            }, 3000);
+        }
+        
+        // Drag and drop handlers
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', JSON.stringify({
+                name: e.target.dataset.name,
+                emoji: e.target.dataset.emoji
+            }));
+            e.target.style.opacity = '0.5';
+        }
+        
+        function handleDragEnd(e) {
+            e.target.style.opacity = '1';
+        }
+        
+        // Drop zone handlers
+        const dropZone = document.getElementById('dropZone');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            
+            try {
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                selectSticker(data.name, data.emoji);
+            } catch (error) {
+                console.error('Error parsing drag data:', error);
+            }
+        });
+        
+        // Mobile navigation
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('nav-open');
+                navToggle.classList.toggle('nav-open');
+            });
+            
+            navLinks.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('nav-open');
+                }
+            });
+        }
+        
+               // Initialize game when page loads - BIND BUTTONS FIRST!
+               document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 Page loaded, starting initialization...');
+            
+            // Test if functions exist
+            console.log('checkAnswer function exists?', typeof checkAnswer);
+            console.log('newChallenge function exists?', typeof newChallenge);
+            console.log('resetGame function exists?', typeof resetGame);
+            
+            const safeBind = (id, handler) => {
+                const el = document.getElementById(id);
+                console.log(`🔍 Button ${id}:`, el ? '✅ FOUND' : '❌ NOT FOUND');
+                
+                if (el) {
+                    // Add a simple test click first
+                    el.onclick = function(e) {
+                        console.log(`🖱️ ONCLICK fired for ${id}`);
+                        e.preventDefault();
+                        e.stopPropagation();
+                        try {
+                            console.log(`🎯 Calling handler for ${id}...`);
+                            handler();
+                            console.log(`✅ Handler completed for ${id}`);
+                        } catch (err) {
+                            console.error(`❌ ERROR in ${id}:`, err);
+                        }
+                        return false;
+                    };
+                    console.log(`✅ onclick handler attached to ${id}`);
+                }
+            };
+            
+            // Bind buttons BEFORE calling initGame
+            console.log('🔗 Binding buttons...');
+            safeBind('btnNewChallenge', newChallenge);
+            safeBind('btnResetGame', resetGame);
+            safeBind('btnCheckAnswer', checkAnswer);
+            
+            // Now initialize game
+            console.log('🎯 Calling initGame...');
+            try {
+                initGame();
+                console.log('✅ initGame completed');
+            } catch (err) {
+                console.error('❌ initGame ERROR:', err);
+            }
+            
+            // Final test - manually check if button is clickable
+            setTimeout(() => {
+                const testBtn = document.getElementById('btnCheckAnswer');
+                console.log('🧪 Final button test:', testBtn ? 'Button exists' : 'Button missing');
+                if (testBtn) {
+                    console.log('Button disabled?', testBtn.disabled);
+                    console.log('Button onclick?', testBtn.onclick ? 'YES' : 'NO');
+                }
+            }, 1000);
+        });
+    </script>
+    </body>
+</html>

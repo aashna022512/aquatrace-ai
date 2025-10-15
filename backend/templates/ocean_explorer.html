@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Explorer - AquaTrace AI 🌊</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        /* Enhanced dark overlay */
+        .bg-overlay {
+            background: rgba(5, 15, 35, 0.92) !important;
+        }
+        
+        .explorer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .explorer-hero {
+            text-align: center;
+            padding: 50px 30px;
+            margin-bottom: 50px;
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border-radius: 25px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .explorer-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .explorer-hero h1 {
+            font-size: 3.2em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00d4ff, #4fc3f7, #00bcd4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .explorer-hero p {
+            font-size: 1.3em;
+            max-width: 900px;
+            margin: 0 auto 40px;
+            color: #e1f5fe;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .ocean-zones {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .zone-card {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .zone-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .zone-card:hover::before {
+            left: 100%;
+        }
+        
+        .zone-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 212, 255, 0.3);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        
+        .zone-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.6));
+        }
+        
+        .zone-title {
+            font-size: 1.8em;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .zone-description {
+            color: #e1f5fe;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .zone-creatures {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .creature-tag {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+        
+        .zone-depth {
+            color: #b3e5fc;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .explore-btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1.1em;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .explore-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.4);
+        }
+        
+        .interactive-map {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            text-align: center;
+        }
+        
+        .map-title {
+            font-size: 2.2em;
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+        
+        .depth-layers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .depth-layer {
+            background: rgba(0, 30, 60, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .depth-layer:hover {
+            transform: scale(1.05);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        
+        .depth-name {
+            color: #00d4ff;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .depth-range {
+            color: #b3e5fc;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        
+        .depth-creatures {
+            color: #e1f5fe;
+            font-size: 0.9em;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .explorer-container {
+                padding: 15px;
+            }
+            
+            .explorer-hero {
+                padding: 30px 20px;
+            }
+            
+            .explorer-hero h1 {
+                font-size: 2.5em;
+            }
+            
+            .explorer-hero p {
+                font-size: 1.1em;
+            }
+            
+            .ocean-zones {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .zone-card {
+                padding: 20px;
+            }
+            
+            .zone-icon {
+                font-size: 3rem;
+            }
+            
+            .zone-title {
+                font-size: 1.5em;
+            }
+            
+            .depth-layers {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-wrap">
+        <video autoplay muted loop class="bg-video">
+            <source src="{{ url_for('static', filename='assets/underwater.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+    </div>
+    
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/map">Map</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/ocean-explorer" class="active">Ocean Explorer</a>
+        </div>
+    </nav>
+    
+    <div class="content">
+        <div class="explorer-container">
+            <div class="explorer-hero">
+                <h1>🌊 Ocean Explorer</h1>
+                <p>Dive deep into the ocean and discover amazing creatures that live in different parts of the sea! Explore different ocean zones and learn about the incredible marine life that calls each zone home.</p>
+            </div>
+            
+            <div class="ocean-zones">
+                <!-- Surface Zone -->
+                <div class="zone-card" onclick="exploreZone('surface')">
+                    <div class="zone-icon">☀️</div>
+                    <div class="zone-title">Sunlight Zone</div>
+                    <div class="zone-description">
+                        The top layer of the ocean where sunlight penetrates. This is where most marine life lives and where you'll find colorful coral reefs!
+                    </div>
+                    <div class="zone-creatures">
+                        <span class="creature-tag">🐠 Fish</span>
+                        <span class="creature-tag">🪸 Coral</span>
+                        <span class="creature-tag">🐢 Turtles</span>
+                        <span class="creature-tag">🦈 Sharks</span>
+                    </div>
+                    <div class="zone-depth">Depth: 0-200 meters</div>
+                    <button class="explore-btn">Explore Surface Zone</button>
+                </div>
+                
+                <!-- Twilight Zone -->
+                <div class="zone-card" onclick="exploreZone('twilight')">
+                    <div class="zone-icon">🌅</div>
+                    <div class="zone-title">Twilight Zone</div>
+                    <div class="zone-description">
+                        A mysterious middle layer where sunlight fades. Many creatures here have special adaptations to survive in the dim light.
+                    </div>
+                    <div class="zone-creatures">
+                        <span class="creature-tag">🦑 Squid</span>
+                        <span class="creature-tag">🐙 Octopus</span>
+                        <span class="creature-tag">🦐 Shrimp</span>
+                        <span class="creature-tag">🐟 Lanternfish</span>
+                    </div>
+                    <div class="zone-depth">Depth: 200-1000 meters</div>
+                    <button class="explore-btn">Explore Twilight Zone</button>
+                </div>
+                
+                <!-- Midnight Zone -->
+                <div class="zone-card" onclick="exploreZone('midnight')">
+                    <div class="zone-icon">🌑</div>
+                    <div class="zone-title">Midnight Zone</div>
+                    <div class="zone-description">
+                        The deep, dark ocean where no sunlight reaches. Creatures here have amazing bioluminescent abilities to survive in complete darkness!
+                    </div>
+                    <div class="zone-creatures">
+                        <span class="creature-tag">🐠 Anglerfish</span>
+                        <span class="creature-tag">🦑 Giant Squid</span>
+                        <span class="creature-tag">🐟 Viperfish</span>
+                        <span class="creature-tag">🦐 Deep Sea Shrimp</span>
+                    </div>
+                    <div class="zone-depth">Depth: 1000-4000 meters</div>
+                    <button class="explore-btn">Explore Midnight Zone</button>
+                </div>
+                
+                <!-- Abyssal Zone -->
+                <div class="zone-card" onclick="exploreZone('abyssal')">
+                    <div class="zone-icon">🌊</div>
+                    <div class="zone-title">Abyssal Zone</div>
+                    <div class="zone-description">
+                        The deep ocean floor where pressure is extreme. Life here is sparse but fascinating, with creatures adapted to survive in the harshest conditions.
+                    </div>
+                    <div class="zone-creatures">
+                        <span class="creature-tag">🦐 Deep Sea Crabs</span>
+                        <span class="creature-tag">🐟 Grenadiers</span>
+                        <span class="creature-tag">🦑 Vampire Squid</span>
+                        <span class="creature-tag">🐠 Tripod Fish</span>
+                    </div>
+                    <div class="zone-depth">Depth: 4000-6000 meters</div>
+                    <button class="explore-btn">Explore Abyssal Zone</button>
+                </div>
+                
+                <!-- Hadal Zone -->
+                <div class="zone-card" onclick="exploreZone('hadal')">
+                    <div class="zone-icon">🕳️</div>
+                    <div class="zone-title">Hadal Zone</div>
+                    <div class="zone-description">
+                        The deepest parts of the ocean in trenches. This is the most extreme environment on Earth, with incredible pressure and cold temperatures.
+                    </div>
+                    <div class="zone-creatures">
+                        <span class="creature-tag">🦐 Amphipods</span>
+                        <span class="creature-tag">🐟 Snailfish</span>
+                        <span class="creature-tag">🦑 Deep Sea Cucumbers</span>
+                        <span class="creature-tag">🐠 Cusk Eels</span>
+                    </div>
+                    <div class="zone-depth">Depth: 6000+ meters</div>
+                    <button class="explore-btn">Explore Hadal Zone</button>
+                </div>
+                
+                <!-- Coral Reef -->
+                <div class="zone-card" onclick="exploreZone('coral')">
+                    <div class="zone-icon">🪸</div>
+                    <div class="zone-title">Coral Reefs</div>
+                    <div class="zone-description">
+                        The rainforests of the sea! These vibrant ecosystems are home to 25% of all marine life despite covering less than 1% of the ocean floor.
+                    </div>
+                    <div class="zone-creatures">
+                        <span class="creature-tag">🐠 Clownfish</span>
+                        <span class="creature-tag">🦈 Reef Sharks</span>
+                        <span class="creature-tag">🐢 Sea Turtles</span>
+                        <span class="creature-tag">🦀 Crabs</span>
+                    </div>
+                    <div class="zone-depth">Depth: 0-50 meters</div>
+                    <button class="explore-btn">Explore Coral Reefs</button>
+                </div>
+            </div>
+            
+            <div class="interactive-map">
+                <h2 class="map-title">🗺️ Ocean Depth Layers</h2>
+                <p style="color: #e1f5fe; margin-bottom: 30px;">Learn about the different layers of the ocean and the amazing creatures that live in each zone!</p>
+                
+                <div class="depth-layers">
+                    <div class="depth-layer">
+                        <div class="depth-name">☀️ Sunlight Zone</div>
+                        <div class="depth-range">0-200m</div>
+                        <div class="depth-creatures">Most marine life, coral reefs, fish, sharks</div>
+                    </div>
+                    <div class="depth-layer">
+                        <div class="depth-name">🌅 Twilight Zone</div>
+                        <div class="depth-range">200-1000m</div>
+                        <div class="depth-creatures">Squid, octopus, bioluminescent fish</div>
+                    </div>
+                    <div class="depth-layer">
+                        <div class="depth-name">🌑 Midnight Zone</div>
+                        <div class="depth-range">1000-4000m</div>
+                        <div class="depth-creatures">Anglerfish, giant squid, deep sea fish</div>
+                    </div>
+                    <div class="depth-layer">
+                        <div class="depth-name">🌊 Abyssal Zone</div>
+                        <div class="depth-range">4000-6000m</div>
+                        <div class="depth-creatures">Deep sea crabs, grenadiers, vampire squid</div>
+                    </div>
+                    <div class="depth-layer">
+                        <div class="depth-name">🕳️ Hadal Zone</div>
+                        <div class="depth-range">6000m+</div>
+                        <div class="depth-creatures">Amphipods, snailfish, trench creatures</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer> 2025 AquaTrace AI — Explore the Ocean Depths 🌊</footer>
+    
+    <script>
+        // Mobile navigation toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('nav-open');
+                navToggle.classList.toggle('nav-open');
+            });
+            
+            navLinks.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('nav-open');
+                }
+            });
+        }
+        
+        // Explore zone function
+        function exploreZone(zone) {
+            const zoneInfo = {
+                'surface': {
+                    name: 'Sunlight Zone',
+                    emoji: '☀️',
+                    description: 'The bright, warm surface waters where most marine life thrives!',
+                    creatures: ['🐠 Colorful Fish', '🪸 Beautiful Corals', '🐢 Sea Turtles', '🦈 Sharks', '🐬 Dolphins']
+                },
+                'twilight': {
+                    name: 'Twilight Zone',
+                    emoji: '🌅',
+                    description: 'The mysterious middle layer where light begins to fade!',
+                    creatures: ['🦑 Giant Squid', '🐙 Octopus', '🦐 Shrimp', '🐟 Lanternfish', '🦈 Deep Sea Sharks']
+                },
+                'midnight': {
+                    name: 'Midnight Zone',
+                    emoji: '🌑',
+                    description: 'The dark depths where bioluminescent creatures light up the darkness!',
+                    creatures: ['🐠 Anglerfish', '🦑 Giant Squid', '🐟 Viperfish', '🦐 Deep Sea Shrimp', '🐠 Hatchetfish']
+                },
+                'abyssal': {
+                    name: 'Abyssal Zone',
+                    emoji: '🌊',
+                    description: 'The deep ocean floor where pressure is extreme!',
+                    creatures: ['🦐 Deep Sea Crabs', '🐟 Grenadiers', '🦑 Vampire Squid', '🐠 Tripod Fish', '🦐 Amphipods']
+                },
+                'hadal': {
+                    name: 'Hadal Zone',
+                    emoji: '🕳️',
+                    description: 'The deepest trenches on Earth - the most extreme environment!',
+                    creatures: ['🦐 Amphipods', '🐟 Snailfish', '🦑 Deep Sea Cucumbers', '🐠 Cusk Eels', '🦐 Trench Shrimp']
+                },
+                'coral': {
+                    name: 'Coral Reefs',
+                    emoji: '🪸',
+                    description: 'The rainforests of the sea - vibrant and full of life!',
+                    creatures: ['🐠 Clownfish', '🦈 Reef Sharks', '🐢 Sea Turtles', '🦀 Crabs', '🐠 Parrotfish']
+                }
+            };
+            
+            const info = zoneInfo[zone];
+            if (info) {
+                showZoneModal(info);
+            }
+        }
+        
+        function showZoneModal(info) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 3000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, rgba(0, 30, 60, 0.9), rgba(0, 15, 35, 0.9));
+                    border-radius: 20px;
+                    padding: 40px;
+                    max-width: 600px;
+                    width: 90%;
+                    border: 2px solid rgba(0, 212, 255, 0.3);
+                    text-align: center;
+                    color: white;
+                ">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">${info.emoji}</div>
+                    <h2 style="color: #00d4ff; margin-bottom: 20px; font-size: 2.5em;">${info.name}</h2>
+                    <p style="color: #e1f5fe; margin-bottom: 30px; font-size: 1.2em; line-height: 1.6;">${info.description}</p>
+                    
+                    <h3 style="color: #00d4ff; margin-bottom: 20px;">Creatures You'll Find Here:</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 30px;">
+                        ${info.creatures.map(creature => `
+                            <span style="
+                                background: rgba(0, 212, 255, 0.2);
+                                color: #00d4ff;
+                                padding: 8px 16px;
+                                border-radius: 20px;
+                                border: 1px solid rgba(0, 212, 255, 0.3);
+                            ">${creature}</span>
+                        `).join('')}
+                    </div>
+                    
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: linear-gradient(135deg, #00d4ff, #0099cc);
+                        color: white;
+                        border: none;
+                        padding: 15px 30px;
+                        border-radius: 25px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        font-size: 1.1em;
+                    ">Close</button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marine News - AquaTrace AI 🌊</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+</head>
+<body>
+    <!-- Background video -->
+    <div class="bg-wrap">
+        <video autoplay muted loop class="bg-video">
+            <source src="{{ url_for('static', filename='assets/underwater.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+    </div>
+    
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/map">Map</a>
+            {% if session.get('username') %}
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <!-- Content -->
+    <div class="content">
+        <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+            <h1>📰 Marine News</h1>
+            <p>Latest updates from the world of marine conservation and research</p>
+            
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">🐋</div>
+                    <div class="card-title">New Whale Species Discovered</div>
+                </div>
+                <div style="padding: 20px;">
+                    <p><strong>January 15, 2025</strong></p>
+                    <p>Scientists have discovered a new species of whale in the Pacific Ocean, highlighting the importance of marine biodiversity research.</p>
+                    <button class="btn" onclick="readMore('whale-discovery')">Read More</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">🪸</div>
+                    <div class="card-title">Coral Reef Recovery Success</div>
+                </div>
+                <div style="padding: 20px;">
+                    <p><strong>January 12, 2025</strong></p>
+                    <p>Great Barrier Reef shows signs of recovery thanks to conservation efforts and reduced water temperatures.</p>
+                    <button class="btn" onclick="readMore('coral-recovery')">Read More</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">🐢</div>
+                    <div class="card-title">Sea Turtle Protection Initiative</div>
+                </div>
+                <div style="padding: 20px;">
+                    <p><strong>January 10, 2025</strong></p>
+                    <p>New international agreement aims to protect sea turtle migration routes across the Pacific.</p>
+                    <button class="btn" onclick="readMore('turtle-protection')">Read More</button>
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">🔬</div>
+                    <div class="card-title">AI in Marine Research</div>
+                </div>
+                <div style="padding: 20px;">
+                    <p><strong>January 8, 2025</strong></p>
+                    <p>Artificial Intelligence is revolutionizing marine species identification and conservation efforts worldwide.</p>
+                    <button class="btn" onclick="readMore('ai-research')">Read More</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>© 2025 AquaTrace AI — Empowering Ocean Conservation 🌊</footer>
+    
+    <script>
+        function readMore(article) {
+            alert(`📰 Opening ${article} article... Full articles coming soon!`);
+        }
+    </script>
+</body>
+</html>

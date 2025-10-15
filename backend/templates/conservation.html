@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conservation Challenges - AquaTrace AI 🌊</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        /* Enhanced dark overlay for better contrast */
+        .bg-overlay {
+            background: rgba(5, 15, 35, 0.92) !important;
+        }
+        
+        .challenge-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .challenge-hero {
+            text-align: center;
+            padding: 50px 30px;
+            margin-bottom: 50px;
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border-radius: 25px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .challenge-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .challenge-hero h1 {
+            font-size: 3.2em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00d4ff, #4fc3f7, #00bcd4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .challenge-hero p {
+            font-size: 1.3em;
+            max-width: 900px;
+            margin: 0 auto 40px;
+            color: #e1f5fe;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 50px 0;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.3), rgba(0, 15, 35, 0.5));
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .stat-card:hover::before {
+            left: 100%;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border-color: rgba(0, 212, 255, 0.4);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: 800;
+            color: #00d4ff;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .stat-label {
+            font-size: 1.1em;
+            color: #b3e5fc;
+            font-weight: 600;
+        }
+        
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .challenge-card {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.3), rgba(0, 15, 35, 0.5));
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+        }
+        
+        .challenge-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4ff, #4fc3f7, #00bcd4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .challenge-card:hover::before {
+            opacity: 1;
+        }
+        
+        .challenge-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 212, 255, 0.3);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        
+        .challenge-header {
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .challenge-icon {
+            font-size: 32px;
+            margin-right: 20px;
+            color: #00d4ff;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.6));
+        }
+        
+        .challenge-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: white;
+            margin: 0;
+        }
+        
+        .challenge-body {
+            padding: 25px;
+        }
+        
+        .challenge-description {
+            color: #e1f5fe;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            font-size: 1.05em;
+        }
+        
+        .challenge-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+            color: #b3e5fc;
+        }
+        
+        .challenge-stat {
+            display: flex;
+            align-items: center;
+        }
+        
+        .challenge-stat i {
+            margin-right: 8px;
+            color: #00d4ff;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            color: #b3e5fc;
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #4fc3f7);
+            border-radius: 5px;
+            transition: width 0.8s ease;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            text-align: center;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 1em;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.4);
+            background: linear-gradient(135deg, #0099cc 0%, #007aa3 100%);
+        }
+        
+        .btn-joined {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        }
+        
+        .btn-joined:hover {
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        }
+        
+        .difficulty {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .difficulty-beginner {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(69, 160, 73, 0.2));
+            color: #a5d6a7;
+            border: 1px solid rgba(76, 175, 80, 0.4);
+        }
+        
+        .difficulty-intermediate {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.3), rgba(255, 183, 77, 0.2));
+            color: #fff59d;
+            border: 1px solid rgba(255, 193, 7, 0.4);
+        }
+        
+        .difficulty-advanced {
+            background: linear-gradient(135deg, rgba(244, 67, 54, 0.3), rgba(229, 57, 53, 0.2));
+            color: #ffab91;
+            border: 1px solid rgba(244, 67, 54, 0.4);
+        }
+        
+        .impact-metrics {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(0, 15, 35, 0.3));
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .impact-metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 0.95em;
+            color: #e1f5fe;
+        }
+        
+        .impact-metric strong {
+            color: #00d4ff;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .challenges-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+            
+            .challenge-hero {
+                padding: 30px 20px;
+            }
+            
+            .challenge-hero h1 {
+                font-size: 2.5em;
+            }
+            
+            .challenge-hero p {
+                font-size: 1.1em;
+            }
+            
+            .stat-number {
+                font-size: 2.5em;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .challenge-hero h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background video -->
+    <div class="bg-wrap">
+        <video autoplay muted loop playsinline preload="metadata" poster="{{ url_for('static', filename='assets/Coral Reef.jpg') }}" class="bg-video">
+            <source src="{{ url_for('static', filename='assets/underwater.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+    </div>
+    
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/map">Map</a>
+            <a href="/conservation" class="active">Challenges</a>
+            {% if session.get('username') %}
+                <a href="/settings">Settings</a>
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <!-- Content -->
+    <div class="content">
+        <div class="challenge-container">
+            <div class="challenge-hero">
+                <h1>Marine Conservation Challenges</h1>
+                <p>Join hands with the AquaTrace AI community to protect our oceans and marine life. Complete challenges, earn rewards, and make a real impact on marine conservation efforts worldwide.</p>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalParticipants">12,847</div>
+                        <div class="stat-label">Active Participants</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="challengesCompleted">58,342</div>
+                        <div class="stat-label">Challenges Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="speciesImpacted">45+</div>
+                        <div class="stat-label">Species Impacted</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="plasticReduced">12.5T</div>
+                        <div class="stat-label">Plastic Waste Reduced</div>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 style="color: #00d4ff; margin-bottom: 30px; text-align: center; font-size: 2.2em;">Featured Challenges</h2>
+            
+            <div class="challenges-grid">
+                <!-- Challenge 1 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">🐢</div>
+                        <h3 class="challenge-title">Turtle Guardian</h3>
+                    </div>
+                    <div class="challenge-body">
+                        <span class="difficulty difficulty-beginner">Beginner</span>
+                        <p class="challenge-description">Help protect sea turtle nesting sites by reducing plastic pollution and participating in beach cleanups. Document your efforts to help researchers track conservation impact.</p>
+                        
+                        <div class="impact-metrics">
+                            <div class="impact-metric">
+                                <strong>Impact:</strong>
+                                <span>High</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Time Commitment:</strong>
+                                <span>2-4 hours/month</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Community:</strong>
+                                <span>8,742 participants</span>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Challenge Progress</span>
+                                <span>65%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-joined" onclick="toggleChallenge('turtle')">
+                            <i class="fas fa-check-circle"></i> Challenge Joined
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Challenge 2 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">🐋</div>
+                        <h3 class="challenge-title">Whale Migration Watch</h3>
+                    </div>
+                    <div class="challenge-body">
+                        <span class="difficulty difficulty-intermediate">Intermediate</span>
+                        <p class="challenge-description">Help track whale migration patterns and advocate for safer shipping routes. Report whale sightings using our app to contribute to marine research.</p>
+                        
+                        <div class="impact-metrics">
+                            <div class="impact-metric">
+                                <strong>Impact:</strong>
+                                <span>Very High</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Time Commitment:</strong>
+                                <span>5-10 hours/month</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Community:</strong>
+                                <span>5,231 participants</span>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Challenge Progress</span>
+                                <span>42%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 42%;"></div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn" onclick="toggleChallenge('whale')">
+                            <i class="fas fa-plus-circle"></i> Join Challenge
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Challenge 3 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">🪸</div>
+                        <h3 class="challenge-title">Coral Reef Restoration</h3>
+                    </div>
+                    <div class="challenge-body">
+                        <span class="difficulty difficulty-advanced">Advanced</span>
+                        <p class="challenge-description">Join coral restoration efforts by adopting a coral fragment, monitoring reef health, or participating in restoration dives. No diving experience required for all activities.</p>
+                        
+                        <div class="impact-metrics">
+                            <div class="impact-metric">
+                                <strong>Impact:</strong>
+                                <span>Critical</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Time Commitment:</strong>
+                                <span>10+ hours/month</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Community:</strong>
+                                <span>3,895 participants</span>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Challenge Progress</span>
+                                <span>28%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 28%;"></div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn" onclick="toggleChallenge('coral')">
+                            <i class="fas fa-plus-circle"></i> Join Challenge
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Challenge 4 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">🦈</div>
+                        <h3 class="challenge-title">Shark Conservation</h3>
+                    </div>
+                    <div class="challenge-body">
+                        <span class="difficulty difficulty-intermediate">Intermediate</span>
+                        <p class="challenge-description">Help protect sharks by reporting sightings, supporting sustainable seafood choices, and educating others about the importance of these apex predators.</p>
+                        
+                        <div class="impact-metrics">
+                            <div class="impact-metric">
+                                <strong>Impact:</strong>
+                                <span>High</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Time Commitment:</strong>
+                                <span>3-5 hours/month</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Community:</strong>
+                                <span>6,512 participants</span>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Challenge Progress</span>
+                                <span>37%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 37%;"></div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn" onclick="toggleChallenge('shark')">
+                            <i class="fas fa-plus-circle"></i> Join Challenge
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Challenge 5 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">🌊</div>
+                        <h3 class="challenge-title">Plastic-Free Ocean</h3>
+                    </div>
+                    <div class="challenge-body">
+                        <span class="difficulty difficulty-beginner">Beginner</span>
+                        <p class="challenge-description">Take the 30-day plastic-free challenge. Reduce single-use plastics in your daily life and organize local cleanups to prevent plastic from reaching the ocean.</p>
+                        
+                        <div class="impact-metrics">
+                            <div class="impact-metric">
+                                <strong>Impact:</strong>
+                                <span>Very High</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Time Commitment:</strong>
+                                <span>1-2 hours/week</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Community:</strong>
+                                <span>15,327 participants</span>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Challenge Progress</span>
+                                <span>18%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 18%;"></div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn" onclick="toggleChallenge('plastic')">
+                            <i class="fas fa-plus-circle"></i> Join Challenge
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Challenge 6 -->
+                <div class="challenge-card">
+                    <div class="challenge-header">
+                        <div class="challenge-icon">📱</div>
+                        <h3 class="challenge-title">Citizen Scientist</h3>
+                    </div>
+                    <div class="challenge-body">
+                        <span class="difficulty difficulty-beginner">Beginner</span>
+                        <p class="challenge-description">Become a citizen scientist by documenting marine species through our app. Your observations help researchers track marine biodiversity and ecosystem health.</p>
+                        
+                        <div class="impact-metrics">
+                            <div class="impact-metric">
+                                <strong>Impact:</strong>
+                                <span>Medium</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Time Commitment:</strong>
+                                <span>Flexible</span>
+                            </div>
+                            <div class="impact-metric">
+                                <strong>Community:</strong>
+                                <span>22,156 participants</span>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Challenge Progress</span>
+                                <span>73%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: 73%;"></div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-joined" onclick="toggleChallenge('scientist')">
+                            <i class="fas fa-check-circle"></i> Challenge Joined
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer> 2025 AquaTrace AI — Empowering Ocean Conservation 🌊</footer>
+    
+    <script>
+        // Mobile navigation toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('nav-open');
+                navToggle.classList.toggle('nav-open');
+            });
+            
+            navLinks.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('nav-open');
+                }
+            });
+        }
+        
+        // Animate stats counting
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                obj.innerHTML = value.toLocaleString() + (id === 'plasticReduced' ? 'T' : '');
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+        
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate stats
+            animateValue('totalParticipants', 0, 12847, 2000);
+            animateValue('challengesCompleted', 0, 58342, 2000);
+            animateValue('speciesImpacted', 0, 45, 1500);
+            
+            // Only animate plastic if it's not already set
+            if (document.getElementById('plasticReduced').textContent.trim() === '0T') {
+                animateValue('plasticReduced', 0, 12.5, 2500);
+            }
+        });
+        
+        // Toggle challenge join/leave
+        function toggleChallenge(type) {
+            const button = event.target.tagName === 'BUTTON' ? event.target : event.target.closest('button');
+            const isJoining = !button.classList.contains('btn-joined');
+            
+            if (isJoining) {
+                button.innerHTML = '<i class="fas fa-check-circle"></i> Challenge Joined';
+                button.classList.add('btn-joined');
+                
+                // Show success message
+                showNotification(`🎉 Successfully joined the ${type} challenge!`);
+                
+                // Update stats
+                const totalEl = document.getElementById('totalParticipants');
+                const currentTotal = parseInt(totalEl.textContent.replace(/,/g, ''));
+                animateValue('totalParticipants', currentTotal, currentTotal + 1, 500);
+                
+            } else {
+                button.innerHTML = '<i class="fas fa-plus-circle"></i> Join Challenge';
+                button.classList.remove('btn-joined');
+                showNotification(`Left the ${type} challenge`);
+            }
+            
+            // Prevent default button behavior
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        function showNotification(message) {
+            const notif = document.createElement('div');
+            notif.textContent = message;
+            notif.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, #00d4ff, #0099cc);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 3000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+                font-weight: 600;
+            `;
+            
+            // Add animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notif);
+            
+            // Remove message after 3 seconds
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

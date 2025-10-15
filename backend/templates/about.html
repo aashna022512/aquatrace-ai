@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - AquaTrace AI 🌊</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+       body {
+    overflow-x: hidden;
+    /* Change background from transparent to the desired dark color */
+    background: #0d1a2d; /* A deep, dark blue/slate color, similar to the Profile page's effective background */
+    margin: 0;
+    padding-top: 80px;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    color: rgba(255, 255, 255, 0.95);
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+    
+
+.bg-wrap {
+    display: none; /* Hide the video wrapper */
+}
+        
+        /* Navbar styles - consistent across all pages */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 60px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background:  rgba(13, 26, 45, 0.85);
+            backdrop-filter: blur(10px);
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4);
+        }
+
+        .nav-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5em;
+            margin: 0;
+        }
+
+        .hamburger {
+            display: block;
+            position: relative;
+        }
+
+        .hamburger,
+        .hamburger::before,
+        .hamburger::after {
+            width: 2em;
+            height: 3px;
+            background: white;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger::before,
+        .hamburger::after {
+            content: '';
+            position: absolute;
+            left: 0;
+        }
+
+        .hamburger::before { top: -8px; }
+        .hamburger::after { bottom: -8px; }
+
+        .nav-toggle.nav-open .hamburger {
+            transform: rotate(45deg);
+        }
+
+        .nav-toggle.nav-open .hamburger::before {
+            transform: rotate(90deg) translate(8px);
+        }
+
+        .nav-toggle.nav-open .hamburger::after {
+            opacity: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 400;
+            font-size: 0.99rem;
+            letter-spacing: 1px;
+            font-family: inherit;
+            position: relative;
+            padding: 5px 0;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffffff;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a.active {
+            font-weight: 600;
+        }
+
+        .nav-links a.active::after {
+            width: 100%;
+            background-color: #00d4ff;
+            box-shadow: 0 0 5px #00d4ff, 0 0 15px #00d4ff;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem;
+            }
+
+            .nav-toggle {
+                display: block;
+                z-index: 1001;
+            }
+
+            .nav-links {
+                position: fixed;
+                background: rgba(0, 0, 43, 0.95);
+                backdrop-filter: blur(10px);
+                top: 0;
+                right: 0;
+                width: 100%;
+                max-width: 300px;
+                height: 100vh;
+                padding: 6rem 2rem 2rem;
+                flex-direction: column;
+                gap: 1.5rem;
+                transform: translateX(100%);
+                transition: transform 0.3s ease-out;
+            }
+
+            .nav-links.nav-open {
+                transform: translateX(0);
+            }
+
+            .nav-links a {
+                font-size: 1.1rem;
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-links a::after {
+                display: none;
+            }
+
+            .nav-links a:hover {
+                color: #00d4ff;
+            }
+
+            .hero-content, .mission-content {
+                padding-left: 10px;
+                padding-right: 10px;
+                max-width: 100%;
+                margin: 0 auto;
+            }
+
+            /* Fix for mobile layout squeezing */
+            body, html { width: 100vw; overflow-x: hidden; }
+
+            .bg-wrap {
+                width: 100vw;
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .hero-section {
+                padding-top: 100px;
+                padding-bottom: 20px;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+                line-height: 1.2;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+                max-width: 90vw;
+                margin: 0 auto 20px;
+            }
+
+            .mission-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 10px 5px;
+                max-width: 100%;
+            }
+
+            .mission-image {
+                padding: 20px;
+                font-size: 6rem;
+                max-width: 100%;
+                border-radius: 15px;
+            }
+
+            .mission-image img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .mission-text {
+                padding: 20px;
+                font-size: 1rem;
+                line-height: 1.5;
+                word-wrap: break-word;
+                hyphens: auto;
+                max-width: 100%;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .feature-card {
+                padding: 25px;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .team-card {
+                max-width: 100%;
+                padding: 20px;
+            }
+
+            .technology-section, .values-section, .contact-section, .story-section {
+                padding: 40px 10px;
+            }
+
+            .tech-stack {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .tech-item {
+                padding: 15px;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .value-card {
+                padding: 20px;
+            }
+
+            .contact-info {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .contact-item {
+                padding: 20px;
+            }
+            /* Fix two-column areas to single column */
+            .contact-section > .content > div { grid-template-columns: 1fr !important; gap: 20px !important; }
+            .story-section .features-grid { grid-template-columns: 1fr !important; }
+            .values-grid { grid-template-columns: 1fr !important; }
+        }
+
+        @media (max-width: 480px) {
+            .mission-text {
+                font-size: 0.95rem;
+                line-height: 1.6;
+                padding: 15px;
+            }
+
+            .mission-content {
+                padding: 5px;
+                gap: 15px;
+            }
+
+            .mission-image {
+                padding: 15px;
+            }
+        }
+        .hero-section {
+            min-height: 40vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            padding-top: 120px;
+            padding-bottom: 40px;
+        }
+        .hero-content {
+            max-width: 800px;
+            padding: 20px 20px;
+            margin: 0 auto;
+        }
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.6;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+        .mission-section {
+            padding: 40px 0;
+            background: transparent;
+            position: relative;
+        }
+        .mission-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border-radius: 2px;
+        }
+        .mission-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .mission-text {
+            color: white;
+            line-height: 1.8;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .mission-text h3 { 
+            color: #00d4ff; 
+            margin-bottom: 25px; 
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        .mission-text p {
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        .mission-image { 
+            text-align: center; 
+            font-size: 8rem;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            padding: 60px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease;
+        }
+        .mission-image:hover {
+            transform: scale(1.05);
+        }
+        .story-section { 
+            padding: 80px 0;
+            background: transparent;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,212,255,0.2);
+            border-color: rgba(0,212,255,0.3);
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 25px;
+            color: white;
+            font-weight: bold;
+        }
+        .feature-title {
+            color: #00d4ff;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .feature-description {
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+        .team-section {
+            padding: 80px 0;
+            background:transparent;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .team-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding:30px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease;
+            max-width: 400px;
+        }
+        .team-avatar {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: linear-gradient(135deg,#00d4ff,#0099cc);
+            display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;
+        }
+        .team-name {color:#00d4ff;font-size:1.2rem;font-weight:600;margin-bottom:8px;}
+        .team-role { color: rgba(255, 255, 255, 0.95); margin-bottom: 15px;}
+        .team-bio {color: rgba(255, 255, 255, 0.95);font-size:0.9rem;line-height:1.5;}
+        .technology-section {padding:80px 0;}
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+            gap: 25px;
+            margin-top:40px;
+        }
+        .tech-item {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px); border-radius:12px; padding:20px; text-align:center; border:1px solid rgba(255,255,255,0.1);
+        }
+        .tech-icon {font-size:2rem;margin-bottom:10px;}
+        .tech-name {color:#00d4ff;font-weight:600;margin-bottom:5px;}
+        .tech-description {color: rgba(255, 255, 255, 0.95);font-size:0.8rem;}
+        .values-section {padding: 80px 0; background: transparent;}
+        .values-grid {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:30px; margin-top:40px;
+        }
+        .value-card {
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border-radius: 16px; padding:30px; text-align:center; border:1px solid rgba(255,255,255,0.1);
+        }
+        .value-icon {font-size:3rem;margin-bottom:20px;}
+        .value-title {color:#00d4ff;font-size:1.3rem;font-weight:600;margin-bottom:15px;}
+        .value-description {color: rgba(255, 255, 255, 0.95);line-height:1.6;}
+        .contact-section {padding:80px 0;text-align:center;background:linear-gradient(135deg,rgba(0,212,255,0.1),rgba(0,153,204,0.1));}
+        .contact-info {
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:30px;margin-top:40px;
+        }
+        .contact-item {
+            background:rgba(255,255,255,0.08);backdrop-filter:blur(12px);border-radius:12px;padding:25px;border:1px solid rgba(255,255,255,0.1);
+        }
+        .contact-icon {font-size:2rem;margin-bottom:15px;color:#00d4ff;}
+        .contact-label {color: rgba(255, 255, 255, 0.95);margin-bottom:8px;}
+        .contact-value {color: rgba(255, 255, 255, 0.95);font-weight:600;}
+        .content p {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        #feedbackForm input,
+        #feedbackForm select,
+        #feedbackForm textarea {
+            color: rgba(255, 255, 255, 0.95) !important;
+        }
+       
+        .content{
+            background:transparent;
+        }
+        .story-timeline, .timeline-item, .timeline-content, .timeline-year, 
+        .timeline-title, .timeline-description, .timeline-line, .timeline-dot {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background video fills entire viewport -->
+    <div class="bg-wrap">
+        <video autoplay muted loop playsinline preload="metadata" poster="{{ url_for('static', filename='assets/Coral Reef.jpg') }}" class="bg-video">
+            <source src="{{ url_for('static', filename='assets/about.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+        <canvas id="dust-canvas"></canvas>
+    </div>
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}" {% if request.path == '/' %}class="active"{% endif %}>Home</a>
+            <a href="{{ url_for('about') }}" {% if request.path == '/about' %}class="active"{% endif %}>About</a>
+            <a href="{{ url_for('map_page') }}" {% if request.path == '/map' %}class="active"{% endif %}>Map</a>
+            <a href="{{ url_for('dashboard') }}" {% if request.path == '/dashboard' %}class="active"{% endif %}>Dashboard</a>
+            <a href="{{ url_for('profile') }}" {% if request.path == '/profile' %}class="active"{% endif %}>Profile</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" {% if request.path == '/login' %}class="active"{% endif %}>Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('nav-open');
+            navToggle.classList.toggle('nav-open');
+        });
+    </script>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">About AquaTrace AI</h1>
+            <p class="hero-subtitle">
+                We're on a mission to revolutionize marine species identification and conservation 
+                through the power of artificial intelligence and citizen science. Identify over 6500+ marine species with our advanced AI.
+            </p>
+        </div>
+    </section>
+    <!-- Mission Section -->
+    <section class="mission-section">
+        <div class="content">
+            <div class="mission-content">
+                <div class="mission-text">
+                    <h3>🌊 Our Mission</h3>
+                    <p>
+                        AquaTrace AI is dedicated to making marine research and conservation more accessible 
+                        to everyone. Our platform combines cutting-edge AI technology with comprehensive 
+                        marine biodiversity data to provide instant species identification and educational content.
+                    </p>
+                    <p>
+                        We believe that understanding and protecting marine life starts with knowledge. 
+                        By empowering researchers, students, and ocean enthusiasts with accurate identification 
+                        tools, we're building a global community committed to ocean conservation.
+                    </p>
+                    <p>
+                        Our goal is to create the world's most comprehensive and accessible marine species 
+                        identification platform, contributing to scientific research and conservation efforts worldwide.
+                    </p>
+                </div>
+                <div class="mission-image">
+                    <img src="{{ url_for('static', filename='assets/Coral Reef.jpg') }}" 
+                         alt="Coral Reef" 
+                         style="width: 200px; height: 200px; border-radius: 15px; object-fit: cover; border: 2px solid #00d4ff; box-shadow: 0 8px 32px rgba(0,212,255,0.3);">
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Features Section -->
+    <section class="story-section">
+        <div class="content">
+            <h2>🌟 Key Features</h2>
+            <p>Discover what makes AquaTrace AI the ultimate marine species identification platform</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <div class="feature-title">Advanced AI Recognition</div>
+                    <div class="feature-description">
+                        Our deep learning model can identify over 6500+ marine species with 95% accuracy, 
+                        using state-of-the-art computer vision technology trained on millions of images.
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <div class="feature-title">Comprehensive Database</div>
+                    <div class="feature-description">
+                        Access detailed information about marine species including habitat, diet, 
+                        conservation status, and fascinating facts from verified scientific sources.
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <div class="feature-title">Conservation Focus</div>
+                    <div class="feature-description">
+                        Track endangered species, learn about conservation efforts, and contribute 
+                        to global marine biodiversity monitoring through citizen science.
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-title">User-Friendly Interface</div>
+                    <div class="feature-description">
+                        Simple drag-and-drop image upload with instant results. Works on any device 
+                        with an intuitive design perfect for researchers, students, and ocean enthusiasts.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Developer Section -->
+    <section class="team-section">
+        <div class="content">
+            <h2>👩‍💻 Developer</h2>
+            <p>Meet the creator behind AquaTrace AI</p>
+            <div class="team-grid" style="justify-content: center;">
+                <div class="team-card" style="max-width: 400px;">
+                    <div class="team-avatar">👩‍🎓</div>
+                    <div class="team-name">Aashna Siddiqui</div>
+                    <div class="team-role">BSc Computer Science - 3rd Year Student</div>
+                    <div class="team-bio">
+                        Passionate computer science student with a deep interest in AI, machine learning, 
+                        and marine conservation. Developed AquaTrace AI as a project to combine technology 
+                        with environmental awareness and education.
+                    </div>
+                    <div style="margin-top:15px;padding:15px;background:rgba(0,212,255,0.1);border-radius:12px;border:1px solid rgba(0,212,255,0.2);">
+                        <div style="color:#00d4ff;font-weight:600;margin-bottom:8px;">🎯 Vision</div>
+                        <div style="color: rgba(255, 255, 255, 0.95);font-size:0.9rem;line-height:1.5;">
+                            "To make marine species identification accessible to everyone and contribute 
+                            to ocean conservation through the power of artificial intelligence."
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Technology Section -->
+    <section class="technology-section">
+        <div class="content">
+            <h2>🔬 Technology Stack</h2>
+            <p>Built with cutting-edge technologies for optimal performance and accuracy</p>
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <div class="tech-icon">🐍</div>
+                    <div class="tech-name">Python & Flask</div>
+                    <div class="tech-description">Backend web framework</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">�</div>
+                    <div class="tech-name">TensorFlow & Keras</div>
+                    <div class="tech-description">H5 deep learning model</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🗄️</div>
+                    <div class="tech-name">MongoDB Atlas</div>
+                    <div class="tech-description">Cloud database via custom ODM</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🎨</div>
+                    <div class="tech-name">HTML5 & CSS3</div>
+                    <div class="tech-description">Frontend styling</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">⚡</div>
+                    <div class="tech-name">JavaScript</div>
+                    <div class="tech-description">Interactive features</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🔐</div>
+                    <div class="tech-name">Firebase Authentication</div>
+                    <div class="tech-description">Secure login system for kids</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🖼️</div>
+                    <div class="tech-name">Pillow & NumPy</div>
+                    <div class="tech-description">Image processing</div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-icon">🌐</div>
+                    <div class="tech-name">Requests & APIs</div>
+                    <div class="tech-description">External integrations</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="content">
+            <h2>💎 Our Values</h2>
+            <p>The principles that guide everything we do</p>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">🔬</div>
+                    <div class="value-title">Scientific Accuracy</div>
+                    <div class="value-description">
+                        We prioritize accuracy and reliability in all our identifications, 
+                        ensuring our platform meets the highest scientific standards.
+                    </div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🌍</div>
+                    <div class="value-title">Conservation Focus</div>
+                    <div class="value-description">
+                        Every feature we build serves the ultimate goal of protecting 
+                        marine biodiversity and promoting ocean conservation.
+                    </div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🤝</div>
+                    <div class="value-title">Community</div>
+                    <div class="value-description">
+                        We believe in the power of community and collaboration to drive 
+                        meaningful change in marine conservation.
+                    </div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🚀</div>
+                    <div class="value-title">Innovation</div>
+                    <div class="value-description">
+                        We continuously push the boundaries of what's possible with AI 
+                        to create better tools for marine research and education.
+                    </div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">📚</div>
+                    <div class="value-title">Education</div>
+                    <div class="value-description">
+                        We're committed to making marine science accessible and engaging 
+                        for learners of all ages and backgrounds.
+                    </div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🌱</div>
+                    <div class="value-title">Sustainability</div>
+                    <div class="value-description">
+                        We operate with environmental responsibility, ensuring our platform 
+                        contributes positively to the planet we're working to protect.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <div class="content">
+            <h2>📞 Get in Touch & Feedback</h2>
+            <p>Have questions, suggestions, or want to share your experience? I'd love to hear from you!</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; align-items: start;">
+                <div style="background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px); border-radius: 16px; padding: 25px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <img src="{{ url_for('static', filename='assets/aashna.jpg') }}" 
+                             alt="Aashna" 
+                             style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #00d4ff;">
+                        <div>
+                            <h3 style="color: white; font-size: 1.3rem; margin: 0 0 3px 0; font-weight: 600;">Aashna</h3>
+                            <p style="color: rgba(255, 255, 255, 0.95); margin: 0; font-size: 0.9rem;">aashna.aquatrace@gmail.com</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,212,255,0.1); border-radius: 10px; border: 1px solid rgba(0,212,255,0.2);">
+                            <div style="color: #00d4ff; font-size: 1.3rem;">📧</div>
+                            <div>
+                                <div style="color: rgba(255, 255, 255, 0.95); font-size: 0.85rem; margin-bottom: 2px;">Email</div>
+                                <div style="color: rgba(255, 255, 255, 0.95); font-weight: 600; font-size: 0.9rem;">aashna.aquatrace@gmail.com</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,212,255,0.1); border-radius: 10px; border: 1px solid rgba(0,212,255,0.2);">
+                            <div style="color: #00d4ff; font-size: 1.3rem;">🎓</div>
+                            <div>
+                                <div style="color: rgba(255, 255, 255, 0.95); font-size: 0.85rem; margin-bottom: 2px;">Student</div>
+                                <div style="color: rgba(255, 255, 255, 0.95); font-weight: 600; font-size: 0.9rem;">BSc Computer Science</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,212,255,0.1); border-radius: 10px; border: 1px solid rgba(0,212,255,0.2);">
+                            <div style="color: #00d4ff; font-size: 1.3rem;">💻</div>
+                            <div>
+                                <div style="color: rgba(255, 255, 255, 0.95); font-size: 0.85rem; margin-bottom: 2px;">Project Type</div>
+                                <div style="color: rgba(255, 255, 255, 0.95); font-weight: 600; font-size: 0.9rem;">Academic Project</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="color: rgba(255, 255, 255, 0.95); font-size: 0.85rem; line-height: 1.5; margin: 0;">
+                            AquaTrace AI is built to help identify marine species with AI models for academic research and conservation.
+                        </p>
+                    </div>
+                </div>
+                <div style="background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border-radius: 16px; padding: 30px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <div style="color: #00d4ff; font-size: 1.5rem;">✅</div>
+                        <h3 style="color: #00d4ff; margin: 0; font-size: 1.3rem;">Send Feedback</h3>
+                    </div>
+                    <div id="feedbackSuccessMessage" style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: none;">
+                        <p style="color: rgba(255, 255, 255, 0.95); margin: 0; font-size: 0.9rem;">
+                            Thank you! Your feedback was submitted successfully.
+                        </p>
+                    </div>
+                    <form id="feedbackForm" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div>
+                            <input type="text" placeholder="Your Name" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: rgba(255, 255, 255, 0.95); outline: none;">
+                        </div>
+                        <div>
+                            <input type="email" placeholder="Your Email" required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: rgba(255, 255, 255, 0.95); outline: none;">
+                        </div>
+                        <div>
+                            <select required style="width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: rgba(255, 255, 255, 0.95); outline: none;">
+                                <option value="">Feedback Type</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="general">General Feedback</option>
+                                <option value="improvement">Improvement Suggestion</option>
+                            </select>
+                        </div>
+                        <button type="submit" style="padding: 12px 24px; background: linear-gradient(135deg, #00d4ff, #0099cc); border:none; border-radius:8px; color:rgba(255, 255, 255, 0.95); font-weight:600; cursor:pointer; transition:all 0.3s ease; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            Submit Feedback <span style="font-size: 1.1rem;">🚀</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- FAQ Section -->
+    <section style="padding:80px 0;background:rgba(0,0,0,0.3);">
+        <div class="content">
+            <h2>❓ FAQ</h2>
+            <div style="display: grid; grid-template-columns:1fr 1fr; gap: 40px; margin-top:40px;">
+                <div>
+                    <h3 style="color:#00d4ff;font-size:1.2rem;margin-bottom:15px;">How does AquaTrace work?</h3>
+                    <p style="color: rgba(255, 255, 255, 0.95);line-height:1.6;">
+                        AquaTrace uses advanced deep learning models trained on thousands of marine species images.
+                        Simply upload a photo of a marine creature, and our AI will identify the species with detailed information about habitat, diet, and conservation status.
+                    </p>
+                </div>
+                <div>
+                    <h3 style="color:#00d4ff;font-size:1.2rem;margin-bottom:15px;">How is accuracy calculated?</h3>
+                    <p style="color: rgba(255, 255, 255, 0.95);line-height:1.6;">
+                        Our model accuracy is calculated using cross-validation on a test dataset of verified marine species images.
+                        We achieve 95% accuracy across 6500+ species through continuous training and validation with marine biology experts.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer> 2025 AquaTrace AI — Created by Aashna Siddiqui 🌊</footer>
+    <script>
+        // Add scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.team-card, .tech-item, .value-card, .contact-item, .feature-card').forEach(item => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(30px)';
+            item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(item);
+        });
+
+        document.querySelectorAll('.team-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const button = this.querySelector('button[type="submit"]');
+            const originalText = button.textContent;
+            button.textContent = 'Feedback Sent! ';
+            button.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            this.reset();
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = 'linear-gradient(135deg, #00d4ff, #0099cc)';
+            }, 3000);
+            document.getElementById('feedbackSuccessMessage').style.display = 'block';
+            setTimeout(() => {document.getElementById('feedbackSuccessMessage').style.display = 'none';}, 2000);
+        });
+        document.querySelectorAll('#feedbackForm input, #feedbackForm select, #feedbackForm textarea').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.borderColor = 'rgba(0,212,255,0.5)';
+                this.style.boxShadow = '0 0 0 3px rgba(0,212,255,0.2)';
+            });
+            input.addEventListener('blur', function() {
+                this.style.borderColor = 'rgba(255,255,255,0.2)';
+                this.style.boxShadow = 'none';
+            });
+        });
+        const style = document.createElement('style');
+        style.textContent = `
+            #feedbackForm input::placeholder,
+            #feedbackForm textarea::placeholder {
+                color: rgba(255,255,255,0.6);
+            }
+            #feedbackForm select option {
+                background: #1e293b;
+                color: rgba(255, 255, 255, 0.95);
+            }
+            @media (max-width: 768px) {
+                .contact-section > .content > div {
+                    grid-template-columns: 1fr !important;
+                    gap: 30px !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

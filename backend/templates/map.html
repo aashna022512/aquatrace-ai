@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marine Species Distribution Map - AquaTrace AI 🌊</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        /* Added inline styles for responsive fixes */
+        html, body {
+            overflow-x: hidden !important;
+        }
+        .map-container {
+            max-width: 100%;
+            width: 100%;
+            height: auto;
+            min-height: 400px;
+        }
+    </style>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    
+    <style>
+        body {
+            background-color: #000a18;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 11, 28, 0.85);
+            z-index: 1;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            margin: 20px 0;
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #7c90bd 0%, #1e293b 50%, #334155 100%);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2);
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 18px;
+        }
+        
+        .map-legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            z-index: 1000;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .species-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            max-width: 350px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            z-index: 1000;
+        }
+        
+        .interactive-btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .interactive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .distribution-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .distribution-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .distribution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
+        }
+        
+        .species-name {
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        
+        .species-detail {
+            margin: 8px 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .population-high { border-left: 4px solid #00d4ff; }
+        .population-medium { border-left: 4px solid #00ff88; }
+        .population-low { border-left: 4px solid #ffaa00; }
+        .population-rare { border-left: 4px solid #ff4444; }
+        
+        /* Custom marker styles */
+        .custom-marker {
+            background: rgba(0, 212, 255, 0.8);
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Enhanced Mobile fixes */
+        @media (max-width: 768px) {
+            html, body { 
+                overflow-x: hidden !important; 
+                width: 100%; 
+            }
+            
+            .content { 
+                padding: 10px; 
+                margin: 4vh auto 2vh;
+            }
+            
+            /* Map container improvements */
+            .map-container { 
+                height: 350px; 
+                margin: 15px 0;
+                border-radius: 15px;
+            }
+            
+            /* Legend positioning for mobile */
+            .map-legend { 
+                position: relative;
+                right: auto;
+                top: auto;
+                left: 10px;
+                bottom: 10px;
+                padding: 15px;
+                margin: 10px 0;
+                max-width: calc(100% - 20px);
+                background: rgba(0, 0, 0, 0.95);
+                border-radius: 10px;
+            }
+            
+            .map-legend h3 {
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+            }
+            
+            .legend-item {
+                margin: 8px 0;
+                font-size: 0.9rem;
+            }
+            
+            /* Species info improvements */
+            .species-info { 
+                position: relative;
+                left: auto;
+                right: auto;
+                bottom: auto;
+                top: auto;
+                max-width: 100%;
+                margin: 15px 0;
+                padding: 20px;
+                background: rgba(0, 0, 0, 0.95);
+                border-radius: 15px;
+            }
+            
+            .species-info h3 {
+                font-size: 1.3rem;
+                margin-bottom: 10px;
+            }
+            
+            .species-info p {
+                font-size: 0.95rem;
+                margin-bottom: 15px;
+            }
+            
+            /* Interactive buttons mobile */
+            .interactive-btn {
+                padding: 12px 18px;
+                font-size: 0.9rem;
+                margin: 5px 3px;
+                border-radius: 20px;
+            }
+            
+            /* Distribution cards mobile */
+            .distribution-cards { 
+                grid-template-columns: 1fr; 
+                gap: 15px;
+                margin-top: 20px;
+            }
+            
+            .distribution-card {
+                padding: 20px;
+                border-radius: 12px;
+            }
+            
+            .species-name {
+                font-size: 1.2rem;
+                margin-bottom: 12px;
+            }
+            
+            .species-detail {
+                font-size: 0.9rem;
+                margin: 6px 0;
+            }
+            
+            /* Species selector mobile */
+            #speciesSelect {
+                width: 100%;
+                padding: 12px;
+                font-size: 1rem;
+                margin-bottom: 15px;
+                border-radius: 8px;
+            }
+            
+            /* Interactive controls mobile */
+            .interactive-controls {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                margin: 20px 0;
+            }
+            
+            .interactive-controls .interactive-btn {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Extra small screens */
+            .map-container { 
+                height: 300px; 
+            }
+            
+            .content h1 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+            
+            .content p {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+            
+            .map-legend {
+                padding: 12px;
+                font-size: 0.85rem;
+            }
+            
+            .species-info {
+                padding: 15px;
+            }
+            
+            .distribution-card {
+                padding: 15px;
+            }
+            
+            .species-name {
+                font-size: 1.1rem;
+            }
+            
+            .species-detail {
+                font-size: 0.85rem;
+            }
+            
+            .interactive-btn {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+                margin: 3px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark overlay -->
+    <div class="bg-overlay"></div>
+    
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/map" class="active">Map</a>
+            <a href="/dashboard">Dashboard</a>
+            {% if session.get('username') %}
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <!-- Content -->
+    <div class="content">
+        <h1 style="color: #ffffff; text-align: center; margin-bottom: 20px;">🗺️ {{ selected_species.title() if selected_species else 'Marine Species' }} Distribution Map</h1>
+        <p style="color: #ffffff; text-align: center; margin-bottom: 40px; font-size: 1.1em;">Interactive global distribution showing where marine species are commonly found across the world's oceans</p>
+
+        <!-- Species Selector -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <select id="speciesSelect" style="padding: 10px; border-radius: 10px; border: 1px solid rgba(0, 212, 255, 0.5); background: #0b1a2c; color: #e6f6ff; margin-right: 10px; box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12) inset;">
+                <option value="">All Species</option>
+                <option value="Dolphins">🐬 Dolphins</option>
+                <option value="Jellyfish">🪼 Jellyfish</option>
+                <option value="Sea Rays">🐟 Sea Rays</option>
+                <option value="Starfish">⭐ Starfish</option>
+                <option value="Whales">🐋 Whales</option>
+                <option value="Sea Turtles">🐢 Sea Turtles</option>
+                <option value="Octopus">🐙 Octopus</option>
+                <option value="Sharks">🦈 Sharks</option>
+            </select>
+            <button onclick="updateMap()" class="interactive-btn">🔄 Update Map</button>
+        </div>
+
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <!-- Map Legend -->
+            <div class="map-legend">
+                <h3>🌊 Population Density</h3>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00d4ff;"></div>
+                    <span>High Population</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #00ff88;"></div>
+                    <span>Medium Population</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ffaa00;"></div>
+                    <span>Low Population</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #ff4444;"></div>
+                    <span>Rare/Endangered</span>
+                </div>
+            </div>
+            
+            <!-- Species Info -->
+            <div class="species-info">
+                <h3>🐋 {{ selected_species.title() if selected_species else 'Marine Life Distribution' }}</h3>
+                <p>Explore marine species habitats across Pacific, Atlantic, Indian, and Arctic oceans</p>
+                <button class="interactive-btn" onclick="showSpeciesDetails()">📊 Species Data</button>
+                <button class="interactive-btn" onclick="showConservation()">🌱 Conservation</button>
+            </div>
+        </div>
+        
+        <!-- Species Distribution Cards -->
+        <div class="distribution-cards">
+            <!-- Dolphins -->
+            <div class="distribution-card population-high">
+                <div class="species-name">🐬 Dolphins</div>
+                <div class="species-detail"><strong>Scientific Name:</strong> Delphinidae</div>
+                <div class="species-detail"><strong>Habitat:</strong> Coastal and open ocean waters</div>
+                <div class="species-detail"><strong>Depth Range:</strong> 0-200m</div>
+                <div class="species-detail"><strong>Population:</strong> High (Stable)</div>
+                <div class="species-detail"><strong>Diet:</strong> Fish, squid, crustaceans</div>
+                <div class="species-detail"><strong>Behavior:</strong> Highly social, echolocation</div>
+                <div class="species-detail"><strong>Best Spots:</strong> Hawaii, Florida, Australia</div>
+            </div>
+            
+            <!-- Jellyfish -->
+            <div class="distribution-card population-medium">
+                <div class="species-name">🪼 Jellyfish</div>
+                <div class="species-detail"><strong>Scientific Name:</strong> Cnidaria</div>
+                <div class="species-detail"><strong>Habitat:</strong> All ocean zones, from surface to deep sea</div>
+                <div class="species-detail"><strong>Depth Range:</strong> 0-4000m</div>
+                <div class="species-detail"><strong>Population:</strong> Medium (Increasing)</div>
+                <div class="species-detail"><strong>Diet:</strong> Plankton, small fish, other jellyfish</div>
+                <div class="species-detail"><strong>Behavior:</strong> Drift with currents, bioluminescence</div>
+                <div class="species-detail"><strong>Best Spots:</strong> Mediterranean, Pacific Northwest</div>
+            </div>
+            
+            <!-- Sea Rays -->
+            <div class="distribution-card population-medium">
+                <div class="species-name">🐟 Sea Rays</div>
+                <div class="species-detail"><strong>Scientific Name:</strong> Batoidea</div>
+                <div class="species-detail"><strong>Habitat:</strong> Sandy bottoms, coral reefs</div>
+                <div class="species-detail"><strong>Depth Range:</strong> 1-3000m</div>
+                <div class="species-detail"><strong>Population:</strong> Medium (Some species declining)</div>
+                <div class="species-detail"><strong>Diet:</strong> Mollusks, worms, small fish</div>
+                <div class="species-detail"><strong>Behavior:</strong> Bottom dwellers, camouflage experts</div>
+                <div class="species-detail"><strong>Best Spots:</strong> Maldives, Great Barrier Reef</div>
+            </div>
+            
+            <!-- Starfish -->
+            <div class="distribution-card population-low">
+                <div class="species-name">⭐ Starfish</div>
+                <div class="species-detail"><strong>Scientific Name:</strong> Asteroidea</div>
+                <div class="species-detail"><strong>Habitat:</strong> Rocky shores, coral reefs, deep ocean</div>
+                <div class="species-detail"><strong>Depth Range:</strong> 0-6000m</div>
+                <div class="species-detail"><strong>Population:</strong> Low (Climate sensitive)</div>
+                <div class="species-detail"><strong>Diet:</strong> Bivalves, gastropods, detritus</div>
+                <div class="species-detail"><strong>Behavior:</strong> Regeneration, external digestion</div>
+                <div class="species-detail"><strong>Best Spots:</strong> Pacific Coast, Mediterranean</div>
+            </div>
+            
+            <!-- Whales -->
+            <div class="distribution-card population-rare">
+                <div class="species-name">🐋 Whales</div>
+                <div class="species-detail"><strong>Scientific Name:</strong> Cetacea</div>
+                <div class="species-detail"><strong>Habitat:</strong> Open ocean, migration routes</div>
+                <div class="species-detail"><strong>Depth Range:</strong> 0-3000m</div>
+                <div class="species-detail"><strong>Population:</strong> Rare (Protected species)</div>
+                <div class="species-detail"><strong>Diet:</strong> Krill, small fish, plankton</div>
+                <div class="species-detail"><strong>Behavior:</strong> Long migrations, complex songs</div>
+                <div class="species-detail"><strong>Best Spots:</strong> Alaska, Norway, Antarctica</div>
+            </div>
+            
+            <!-- Sea Turtles -->
+            <div class="distribution-card population-rare">
+                <div class="species-name">🐢 Sea Turtles</div>
+                <div class="species-detail"><strong>Scientific Name:</strong> Chelonioidea</div>
+                <div class="species-detail"><strong>Habitat:</strong> Coastal waters, nesting beaches</div>
+                <div class="species-detail"><strong>Depth Range:</strong> 0-1000m</div>
+                <div class="species-detail"><strong>Population:</strong> Rare (Endangered)</div>
+                <div class="species-detail"><strong>Diet:</strong> Seagrass, jellyfish, crustaceans</div>
+                <div class="species-detail"><strong>Behavior:</strong> Long-distance migration, beach nesting</div>
+                <div class="species-detail"><strong>Best Spots:</strong> Costa Rica, Great Barrier Reef</div>
+            </div>
+            
+            <!-- Octopus -->
+            <div class="distribution-card population-medium">
+                <div class="species-name">🐙 Octopus</div>
+                <div class="species-detail"><strong>Scientific Name:</strong> Octopoda</div>
+                <div class="species-detail"><strong>Habitat:</strong> Rocky reefs, caves, sandy bottoms</div>
+                <div class="species-detail"><strong>Depth Range:</strong> 0-7000m</div>
+                <div class="species-detail"><strong>Population:</strong> Medium (Stable)</div>
+                <div class="species-detail"><strong>Diet:</strong> Crabs, fish, mollusks</div>
+                <div class="species-detail"><strong>Behavior:</strong> Highly intelligent, camouflage masters</div>
+                <div class="species-detail"><strong>Best Spots:</strong> Mediterranean, Pacific Northwest</div>
+            </div>
+            
+            <!-- Sharks -->
+            <div class="distribution-card population-low">
+                <div class="species-name">🦈 Sharks</div>
+                <div class="species-detail"><strong>Scientific Name:</strong> Selachimorpha</div>
+                <div class="species-detail"><strong>Habitat:</strong> All ocean environments</div>
+                <div class="species-detail"><strong>Depth Range:</strong> 0-4000m</div>
+                <div class="species-detail"><strong>Population:</strong> Low (Declining)</div>
+                <div class="species-detail"><strong>Diet:</strong> Fish, seals, plankton (varies by species)</div>
+                <div class="species-detail"><strong>Behavior:</strong> Apex predators, electroreception</div>
+                <div class="species-detail"><strong>Best Spots:</strong> South Africa, Australia, Bahamas</div>
+            </div>
+        </div>
+        
+        <!-- Interactive Controls -->
+        <div class="interactive-controls">
+            <button class="interactive-btn" onclick="focusRegion('pacific')">🌊 Pacific Ocean</button>
+            <button class="interactive-btn" onclick="focusRegion('atlantic')">🌊 Atlantic Ocean</button>
+            <button class="interactive-btn" onclick="focusRegion('indian')">🏝️ Indian Ocean</button>
+            <button class="interactive-btn" onclick="focusRegion('arctic')">❄️ Arctic Ocean</button>
+            <button class="interactive-btn" onclick="resetView()">🌍 Global View</button>
+        </div>
+    </div>
+    
+    <footer> 2025 AquaTrace AI — Empowering Ocean Conservation 🌊</footer>
+    
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet MarkerCluster JavaScript -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    
+    <script>
+        // Initialize map
+        let map = L.map('map').setView([20, 0], 2);
+        
+        // Add tile layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: ' OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
+        
+        // Marine species locations
+        const speciesLocations = [
+            // Dolphins
+            {name: "Dolphins", lat: 25.7617, lng: -80.1918, type: "high", info: "Bottlenose Dolphins - Florida Keys"},
+            {name: "Dolphins", lat: 21.3099, lng: -157.8581, type: "high", info: "Spinner Dolphins - Hawaii"},
+            {name: "Dolphins", lat: -33.8688, lng: 151.2093, type: "high", info: "Common Dolphins - Sydney"},
+            
+            // Jellyfish
+            {name: "Jellyfish", lat: 43.7696, lng: 11.2558, type: "medium", info: "Moon Jellyfish - Mediterranean"},
+            {name: "Jellyfish", lat: 47.6062, lng: -122.3321, type: "medium", info: "Lion's Mane - Pacific Northwest"},
+            {name: "Jellyfish", lat: 35.6762, lng: 139.6503, type: "medium", info: "Box Jellyfish - Japan"},
+            
+            // Sea Rays
+            {name: "Sea Rays", lat: 3.2028, lng: 73.2207, type: "medium", info: "Manta Rays - Maldives"},
+            {name: "Sea Rays", lat: -16.2902, lng: 145.7781, type: "medium", info: "Stingrays - Great Barrier Reef"},
+            {name: "Sea Rays", lat: 18.2208, lng: -66.5901, type: "medium", info: "Eagle Rays - Puerto Rico"},
+            
+            // Starfish
+            {name: "Starfish", lat: 49.2827, lng: -123.1207, type: "low", info: "Sea Stars - British Columbia"},
+            {name: "Starfish", lat: 40.7589, lng: 14.0583, type: "low", info: "Crown of Thorns - Mediterranean"},
+            {name: "Starfish", lat: -34.6037, lng: 18.4441, type: "low", info: "Cushion Stars - South Africa"},
+            
+            // Whales
+            {name: "Whales", lat: 64.2008, lng: -21.8174, type: "rare", info: "Humpback Whales - Iceland"},
+            {name: "Whales", lat: 58.9700, lng: -152.4044, type: "rare", info: "Orcas - Alaska"},
+            {name: "Whales", lat: -64.7747, lng: -62.1838, type: "rare", info: "Blue Whales - Antarctica"},
+            
+            // Sea Turtles
+            {name: "Sea Turtles", lat: 9.9, lng: -84.5, type: "rare", info: "Green Sea Turtles - Costa Rica"},
+            {name: "Sea Turtles", lat: -16.2902, lng: 145.7781, type: "rare", info: "Loggerhead Turtles - Great Barrier Reef"},
+            
+            // Octopus
+            {name: "Octopus", lat: 40.4168, lng: -3.7038, type: "medium", info: "Common Octopus - Mediterranean"},
+            {name: "Octopus", lat: 47.6062, lng: -122.3321, type: "medium", info: "Giant Pacific Octopus - Pacific Northwest"},
+            
+            // Sharks
+            {name: "Sharks", lat: -34.0522, lng: 18.6184, type: "low", info: "Great White Sharks - South Africa"},
+            {name: "Sharks", lat: -33.8688, lng: 151.2093, type: "low", info: "Tiger Sharks - Australia"},
+            {name: "Sharks", lat: 25.7617, lng: -77.3926, type: "low", info: "Reef Sharks - Bahamas"}
+        ];
+
+        // Cluster options
+        const clusterOptions = {
+            maxClusterRadius: 50,
+            iconCreateFunction: function(cluster) {
+                return L.divIcon({
+                    html: '<div style="background: rgba(0, 212, 255, 0.8); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 2px solid white;">' + cluster.getChildCount() + '</div>',
+                    className: 'custom-marker-cluster',
+                    iconSize: L.point(30, 30, true)
+                });
+            }
+        };
+
+        function createCluster() {
+            return L.markerClusterGroup(clusterOptions);
+        }
+
+        function addMarkers(locations, cluster) {
+            locations.forEach(location => {
+                let color = '#00d4ff';
+                if (location.type === 'medium') color = '#00ff88';
+                if (location.type === 'low') color = '#ffaa00';
+                if (location.type === 'rare') color = '#ff4444';
+
+                let marker = L.circleMarker([location.lat, location.lng], {
+                    color: 'white',
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    radius: 8,
+                    weight: 2
+                });
+
+                marker.bindPopup(`
+                    <div style="color: #333; font-family: Arial, sans-serif;">
+                        <h3 style="color: ${color}; margin: 0 0 10px 0;">${location.name}</h3>
+                        <p><strong>Location:</strong> ${location.info}</p>
+                        <p><strong>Population:</strong> ${location.type.toUpperCase()}</p>
+                    </div>
+                `);
+
+                cluster.addLayer(marker);
+            });
+        }
+
+        // Initially create cluster and add all markers
+        let markerCluster = createCluster();
+        addMarkers(speciesLocations, markerCluster);
+        markerCluster.addTo(map);
+
+        function updateMap() {
+            const selected = document.getElementById('speciesSelect').value;
+            // Remove existing cluster
+            map.removeLayer(markerCluster);
+            // Create new cluster
+            markerCluster = createCluster();
+            let filteredLocations = selected ? speciesLocations.filter(loc => loc.name === selected) : speciesLocations;
+            addMarkers(filteredLocations, markerCluster);
+            markerCluster.addTo(map);
+        }
+
+        // Interactive functions
+        function showSpeciesDetails() {
+            alert(' Marine Species Data:\n\n Dolphins: Highly intelligent marine mammals\n Jellyfish: Ancient cnidarians, 95% water\n Sea Rays: Cartilaginous fish, related to sharks\n Starfish: Echinoderms with regeneration abilities\n Whales: Largest animals on Earth\n Sea Turtles: Ancient mariners, some live 100+ years\n Octopus: Highly intelligent invertebrates\n Sharks: Apex predators, 400+ million years old');
+        }
+        
+        function showConservation() {
+            alert(' Conservation Status:\n\n• Ocean plastic pollution: Critical threat\n• Climate change: Rising temperatures\n• Overfishing: Depleting fish stocks\n• Habitat destruction: Coral reef bleaching\n• Ship strikes: Threat to large marine life\n\n How you can help:\n• Reduce plastic use\n• Support marine protected areas\n• Choose sustainable seafood\n• Participate in beach cleanups');
+        }
+        
+        function focusRegion(region) {
+            const regions = {
+                'pacific': {lat: 0, lng: -140, zoom: 3, info: 'Pacific Ocean - Largest and deepest ocean'},
+                'atlantic': {lat: 30, lng: -30, zoom: 3, info: 'Atlantic Ocean - Second largest ocean'},
+                'indian': {lat: -20, lng: 80, zoom: 3, info: 'Indian Ocean - Warmest ocean'},
+                'arctic': {lat: 80, lng: 0, zoom: 3, info: 'Arctic Ocean - Smallest and shallowest ocean'}
+            };
+            
+            if (regions[region]) {
+                map.setView([regions[region].lat, regions[region].lng], regions[region].zoom);
+                alert(` Focusing on ${region.toUpperCase()}:\n\n${regions[region].info}`);
+            }
+        }
+        
+        function resetView() {
+            map.setView([20, 0], 2);
+        }
+        
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.distribution-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
+        });
+        
+        // Mobile navigation toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('nav-open');
+                navToggle.classList.toggle('nav-open');
+            });
+            
+            navLinks.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('nav-open');
+                }
+            });
+        }
+        
+        // Add CSS animation + dropdown theming
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            #speciesSelect option { background: #0b1a2c; color: #e6f6ff; }
+            #speciesSelect:focus { outline: none; box-shadow: 0 0 0 3px rgba(0,212,255,.35); border-color: #00d4ff; }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

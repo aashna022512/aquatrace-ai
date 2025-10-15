@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Species Explorer - AquaTrace AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        body { padding-top: 80px; overflow-x: hidden; }
+        .explorer-container{max-width:1200px;margin:0 auto;padding:20px}
+        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:30px}
+        .card{background:rgba(0,212,255,0.15);border:2px solid rgba(0,212,255,0.3);border-radius:20px;padding:25px;text-align:center;backdrop-filter:blur(15px);transition:.3s;cursor:pointer;position:relative;overflow:hidden;}
+        .card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00d4ff,#0099cc);opacity:0;transition:opacity 0.3s;}
+        .card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 15px 40px rgba(0,212,255,.35);border-color:rgba(0,212,255,0.6);}
+        .card:hover::before{opacity:1;}
+        .emoji{font-size:3.5rem;margin-bottom:15px;filter:drop-shadow(0 0 12px rgba(0,212,255,.5));animation:float 3s ease-in-out infinite;}
+        @keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-8px)}}
+        .card h3{color:#00d4ff;margin:10px 0 12px;font-size:1.4rem;font-weight:700;text-shadow:0 0 10px rgba(0,212,255,0.3);}
+        .badge{display:inline-block;padding:8px 14px;border-radius:20px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);font-size:.9rem;color:rgba(255,255,255,0.95);margin-top:8px;}
+        .fact-box{background:rgba(0,212,255,0.1);border:2px solid rgba(0,212,255,0.3);border-radius:12px;padding:12px;margin-top:12px;font-size:0.85rem;color:rgba(255,255,255,0.9);line-height:1.5;min-height:60px;}
+        .hero{text-align:center;margin:30px 0 20px;background:rgba(0,212,255,0.08);padding:40px 20px;border-radius:20px;border:1px solid rgba(0,212,255,0.2);}
+        .hero h1{color:#00d4ff;font-size:2.5rem;margin-bottom:15px;text-shadow:0 0 20px rgba(0,212,255,0.4);}
+        .hero p{color:rgba(255,255,255,0.9);font-size:1.1rem;}
+        .bg-overlay{background:rgba(10,25,50,0.85)!important;}
+        
+        /* Navbar styles */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 60px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 43, 0.5);
+            backdrop-filter: blur(10px);
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        .nav-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5em;
+        }
+        .hamburger {
+            display: block;
+            position: relative;
+        }
+        .hamburger, .hamburger::before, .hamburger::after {
+            width: 2em;
+            height: 3px;
+            background: white;
+            transition: transform 0.3s ease;
+        }
+        .hamburger::before, .hamburger::after {
+            content: '';
+            position: absolute;
+            left: 0;
+        }
+        .hamburger::before { top: -8px; }
+        .hamburger::after { bottom: -8px; }
+        .nav-toggle.nav-open .hamburger { transform: rotate(45deg); }
+        .nav-toggle.nav-open .hamburger::before { transform: rotate(90deg) translate(8px); }
+        .nav-toggle.nav-open .hamburger::after { opacity: 0; }
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 400;
+            font-size: 0.99rem;
+            letter-spacing: 1px;
+            position: relative;
+            padding: 5px 0;
+            transition: color 0.3s ease;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffffff;
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a.active::after {
+            width: 100%;
+            background-color: #00d4ff;
+            box-shadow: 0 0 5px #00d4ff;
+        }
+        
+        @media (max-width: 768px) {
+            nav { padding: 1rem; }
+            .nav-toggle { display: block; z-index: 1001; }
+            .nav-links {
+                position: fixed;
+                background: rgba(0, 0, 43, 0.95);
+                backdrop-filter: blur(10px);
+                top: 0;
+                right: 0;
+                width: 100%;
+                max-width: 300px;
+                height: 100vh;
+                padding: 6rem 2rem 2rem;
+                flex-direction: column;
+                gap: 1.5rem;
+                transform: translateX(100%);
+                transition: transform 0.3s ease-out;
+            }
+            .nav-links.nav-open { transform: translateX(0); }
+            .nav-links a {
+                font-size: 1.1rem;
+                width: 100%;
+                text-align: center;
+            }
+            html,body{overflow-x:hidden;width:100%}
+            .content{padding-left:10px;padding-right:10px}
+            .cards{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:15px;}
+            .card{padding:20px;}
+            .emoji{font-size:2.5rem;}
+        }
+    </style>
+    <script>
+        function speak(text){
+            try{ const s=new SpeechSynthesisUtterance(text); s.rate=1.0; s.pitch=1.1; speechSynthesis.speak(s);}catch(e){}
+        }
+        function showFact(name,fact,emoji){
+            const card = event.currentTarget;
+            const factBox = card.querySelector('.fact-box');
+            factBox.textContent = fact;
+            factBox.style.display = 'block';
+            speak('Fun fact about '+name+'. '+fact);
+        }
+    </script>
+</head>
+<body>
+    <!-- Background video with dark overlay -->
+    <div class="bg-wrap">
+        <video autoplay muted loop playsinline preload="metadata" poster="{{ url_for('static', filename='assets/Coral Reef.jpg') }}" class="bg-video">
+            <source src="{{ url_for('static', filename='assets/underwater.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+    </div>
+    
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/map">Map</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/species_explorer" class="active">Explorer</a>
+        </div>
+    </nav>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('nav-open');
+            navToggle.classList.toggle('nav-open');
+        });
+        navLinks.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                navLinks.classList.remove('nav-open');
+                navToggle.classList.remove('nav-open');
+            }
+        });
+    </script>
+    
+    <div class="content explorer-container">
+        <div class="hero">
+            <h1>🧪 Marine Species Explorer</h1>
+            <p>Click any species card to discover amazing facts! 🌊</p>
+        </div>
+        <div class="cards">
+            <div class="card" onclick="showFact('Dolphins','Dolphins have names for each other using special whistles! They can recognize their friends even after 20 years apart.','🐬')">
+                <div class="emoji">🐬</div>
+                <h3>Dolphins</h3>
+                <div class="badge">Super Smart Swimmers</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Sea Turtles','Sea turtles can live for more than 100 years! They return to the same beach where they were born to lay their eggs.','🐢')">
+                <div class="emoji">🐢</div>
+                <h3>Sea Turtles</h3>
+                <div class="badge">Ancient Travelers</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Sharks','Sharks have been on Earth for over 400 million years! They existed before trees and dinosaurs.','🦈')">
+                <div class="emoji">🦈</div>
+                <h3>Sharks</h3>
+                <div class="badge">Ocean Guardians</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Octopus','An octopus has three hearts and blue blood! They can also change color in less than a second.','🐙')">
+                <div class="emoji">🐙</div>
+                <h3>Octopus</h3>
+                <div class="badge">Camouflage Masters</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Jellyfish','Some jellyfish can glow in the dark and one species is immortal! It can reverse its aging process.','🪼')">
+                <div class="emoji">🪼</div>
+                <h3>Jellyfish</h3>
+                <div class="badge">Glowing Drifters</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Whales','Blue whales are the biggest animals to ever exist! Their hearts are as big as a car.','🐋')">
+                <div class="emoji">🐋</div>
+                <h3>Whales</h3>
+                <div class="badge">Gentle Giants</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Clownfish','Clownfish live safely among stinging anemones! They are immune to the anemone poison.','🐠')">
+                <div class="emoji">🐠</div>
+                <h3>Clownfish</h3>
+                <div class="badge">Anemone Buddies</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Starfish','Starfish can regrow lost arms! Some species can even grow a whole new body from just one arm.','⭐')">
+                <div class="emoji">⭐</div>
+                <h3>Starfish</h3>
+                <div class="badge">Regeneration Pros</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Manta Rays','Manta rays have the biggest brains among fish! They can recognize themselves in mirrors.','🐟')">
+                <div class="emoji">🐟</div>
+                <h3>Sea Rays</h3>
+                <div class="badge">Graceful Gliders</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Seahorses','Male seahorses get pregnant and give birth to babies! They can have up to 2000 babies at once.','🦄')">
+                <div class="emoji">🦄</div>
+                <h3>Seahorses</h3>
+                <div class="badge">Unique Dads</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Crabs','Crabs walk sideways because of their leg structure! Some crabs can run at 12 feet per second.','🦀')">
+                <div class="emoji">🦀</div>
+                <h3>Crabs</h3>
+                <div class="badge">Sideways Walkers</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Lobsters','Lobsters can live for over 100 years! They keep growing throughout their entire lives.','🦞')">
+                <div class="emoji">🦞</div>
+                <h3>Lobsters</h3>
+                <div class="badge">Eternal Growers</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Squid','Giant squid have eyes as big as basketballs! They are the largest eyes in the animal kingdom.','🦑')">
+                <div class="emoji">🦑</div>
+                <h3>Squid</h3>
+                <div class="badge">Deep Sea Hunters</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Pufferfish','Pufferfish can inflate to 3 times their size! They do this to scare away predators.','🐡')">
+                <div class="emoji">🐡</div>
+                <h3>Pufferfish</h3>
+                <div class="badge">Inflatable Defenders</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Seals','Seals can hold their breath for up to 2 hours! They sleep underwater and come up for air without waking.','🦭')">
+                <div class="emoji">🦭</div>
+                <h3>Seals</h3>
+                <div class="badge">Breath-Holding Champs</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Sea Otters','Sea otters use rocks as tools to crack open shellfish! They are one of the few animals that use tools.','🦦')">
+                <div class="emoji">🦦</div>
+                <h3>Sea Otters</h3>
+                <div class="badge">Tool Users</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Coral','Coral reefs are made by tiny animals called polyps! They provide homes for 25% of all marine species.','🪸')">
+                <div class="emoji">🪸</div>
+                <h3>Coral</h3>
+                <div class="badge">Reef Builders</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+            <div class="card" onclick="showFact('Anglerfish','Female anglerfish have a glowing lure on their heads! They use it to attract prey in the deep dark ocean.','🐟')">
+                <div class="emoji">🐟</div>
+                <h3>Anglerfish</h3>
+                <div class="badge">Deep Sea Lighters</div>
+                <div class="fact-box" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+    <footer> 2025 AquaTrace AI — Learn and Save Our Oceans 🌊 | <span style="color: #00d4ff; text-shadow: 0 0 10px rgba(0,212,255,0.6); font-weight: 600;">Made by Aashna</span></footer>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+
+# Credentials and sensitive files
+marine.json
+cloud-api.json
+
+# Uploads
+backend/uploads/
+uploads/
+
+# Database
+*.db
+*.sqlite
+
+# Node.js
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+

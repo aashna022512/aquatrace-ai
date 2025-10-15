@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save the Ocean Game - AquaTrace AI 🌊</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        /* Enhanced dark overlay */
+        .bg-overlay {
+            background: rgba(5, 15, 35, 0.92) !important;
+        }
+        
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .game-hero {
+            text-align: center;
+            padding: 50px 30px;
+            margin-bottom: 50px;
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border-radius: 25px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 212, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .game-hero h1 {
+            font-size: 3.2em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #00d4ff, #4fc3f7, #00bcd4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .game-hero p {
+            font-size: 1.3em;
+            max-width: 900px;
+            margin: 0 auto 40px;
+            color: #e1f5fe;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .missions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .mission-card {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .mission-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .mission-card:hover::before {
+            left: 100%;
+        }
+        
+        .mission-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0, 212, 255, 0.3);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        
+        .mission-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.6));
+        }
+        
+        .mission-title {
+            font-size: 1.8em;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .mission-description {
+            color: #e1f5fe;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .mission-objectives {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .objective-title {
+            color: #00d4ff;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .objective-list {
+            color: #e1f5fe;
+            line-height: 1.6;
+        }
+        
+        .objective-list li {
+            margin-bottom: 8px;
+        }
+        
+        .mission-reward {
+            color: #4fc3f7;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .start-mission-btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1.1em;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+        
+        .start-mission-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 212, 255, 0.4);
+        }
+        
+        .progress-section {
+            background: linear-gradient(135deg, rgba(0, 30, 60, 0.4), rgba(0, 15, 35, 0.6));
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            text-align: center;
+        }
+        
+        .progress-title {
+            font-size: 2.2em;
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+        
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-item {
+            background: rgba(0, 30, 60, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            color: #00d4ff;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #e1f5fe;
+            font-size: 1.1em;
+        }
+        
+        .achievements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .achievement-card {
+            background: rgba(0, 30, 60, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .achievement-card:hover {
+            transform: scale(1.05);
+            border-color: rgba(0, 212, 255, 0.4);
+        }
+        
+        .achievement-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .achievement-title {
+            color: #00d4ff;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .achievement-description {
+            color: #e1f5fe;
+            font-size: 0.9em;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            .game-hero {
+                padding: 30px 20px;
+            }
+            
+            .game-hero h1 {
+                font-size: 2.5em;
+            }
+            
+            .game-hero p {
+                font-size: 1.1em;
+            }
+            
+            .missions-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .mission-card {
+                padding: 20px;
+            }
+            
+            .mission-icon {
+                font-size: 3rem;
+            }
+            
+            .mission-title {
+                font-size: 1.5em;
+            }
+            
+            .progress-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .achievements {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-wrap">
+        <video autoplay muted loop class="bg-video">
+            <source src="{{ url_for('static', filename='assets/dark1.mp4') }}" type="video/mp4">
+        </video>
+        <div class="bg-overlay"></div>
+    </div>
+    
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about">About</a>
+            <a href="/map">Map</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/profile">Profile</a>
+            <a href="/save-ocean-game" class="active">Save the Ocean</a>
+        </div>
+    </nav>
+    
+    <div class="content">
+        <div class="game-container">
+            <div class="game-hero">
+                <h1>🌱 Save the Ocean Game</h1>
+                <p>Play fun missions to help protect the ocean and learn how to keep our seas clean and healthy! Complete challenges, earn points, and become an ocean conservation hero!</p>
+            </div>
+            
+            <div class="missions-grid">
+                <!-- Mission 1: Clean Up the Beach -->
+                <div class="mission-card" onclick="startMission('beach-cleanup')">
+                    <div class="mission-icon">🏖️</div>
+                    <div class="mission-title">Beach Cleanup Mission</div>
+                    <div class="mission-description">
+                        Help clean up the beach and remove harmful plastic waste that threatens marine life!
+                    </div>
+                    <div class="mission-objectives">
+                        <div class="objective-title">🎯 Mission Objectives:</div>
+                        <ul class="objective-list">
+                            <li>Collect 20 pieces of plastic waste</li>
+                            <li>Sort recyclable materials</li>
+                            <li>Learn about plastic pollution</li>
+                            <li>Protect sea turtle nesting areas</li>
+                        </ul>
+                    </div>
+                    <div class="mission-reward">🏆 Reward: Ocean Cleaner Badge + 100 Points</div>
+                    <button class="start-mission-btn">Start Beach Cleanup</button>
+                </div>
+                
+                <!-- Mission 2: Coral Reef Protection -->
+                <div class="mission-card" onclick="startMission('coral-protection')">
+                    <div class="mission-icon">🪸</div>
+                    <div class="mission-title">Coral Reef Protection</div>
+                    <div class="mission-description">
+                        Protect the beautiful coral reefs from climate change and pollution!
+                    </div>
+                    <div class="mission-objectives">
+                        <div class="objective-title">🎯 Mission Objectives:</div>
+                        <ul class="objective-list">
+                            <li>Monitor coral health</li>
+                            <li>Remove harmful algae</li>
+                            <li>Plant new coral fragments</li>
+                            <li>Educate about reef conservation</li>
+                        </ul>
+                    </div>
+                    <div class="mission-reward">🏆 Reward: Reef Guardian Badge + 150 Points</div>
+                    <button class="start-mission-btn">Protect Coral Reefs</button>
+                </div>
+                
+                <!-- Mission 3: Marine Life Rescue -->
+                <div class="mission-card" onclick="startMission('marine-rescue')">
+                    <div class="mission-icon">🐋</div>
+                    <div class="mission-title">Marine Life Rescue</div>
+                    <div class="mission-description">
+                        Rescue marine animals from dangerous situations and help them return to safety!
+                    </div>
+                    <div class="mission-objectives">
+                        <div class="objective-title">🎯 Mission Objectives:</div>
+                        <ul class="objective-list">
+                            <li>Rescue entangled sea turtles</li>
+                            <li>Help stranded dolphins</li>
+                            <li>Remove fishing nets from whales</li>
+                            <li>Release healthy animals</li>
+                        </ul>
+                    </div>
+                    <div class="mission-reward">🏆 Reward: Marine Hero Badge + 200 Points</div>
+                    <button class="start-mission-btn">Rescue Marine Life</button>
+                </div>
+                
+                <!-- Mission 4: Ocean Education -->
+                <div class="mission-card" onclick="startMission('ocean-education')">
+                    <div class="mission-icon">📚</div>
+                    <div class="mission-title">Ocean Education Campaign</div>
+                    <div class="mission-description">
+                        Spread awareness about ocean conservation and teach others how to protect marine life!
+                    </div>
+                    <div class="mission-objectives">
+                        <div class="objective-title">🎯 Mission Objectives:</div>
+                        <ul class="objective-list">
+                            <li>Create educational posters</li>
+                            <li>Give presentations to friends</li>
+                            <li>Share conservation tips</li>
+                            <li>Organize community events</li>
+                        </ul>
+                    </div>
+                    <div class="mission-reward">🏆 Reward: Ocean Educator Badge + 120 Points</div>
+                    <button class="start-mission-btn">Educate Others</button>
+                </div>
+                
+                <!-- Mission 5: Sustainable Fishing -->
+                <div class="mission-card" onclick="startMission('sustainable-fishing')">
+                    <div class="mission-icon">🎣</div>
+                    <div class="mission-title">Sustainable Fishing Practices</div>
+                    <div class="mission-description">
+                        Learn about sustainable fishing and help protect fish populations for future generations!
+                    </div>
+                    <div class="mission-objectives">
+                        <div class="objective-title">🎯 Mission Objectives:</div>
+                        <ul class="objective-list">
+                            <li>Learn about fish breeding seasons</li>
+                            <li>Practice catch and release</li>
+                            <li>Identify protected species</li>
+                            <li>Promote sustainable practices</li>
+                        </ul>
+                    </div>
+                    <div class="mission-reward">🏆 Reward: Sustainable Fisher Badge + 130 Points</div>
+                    <button class="start-mission-btn">Practice Sustainable Fishing</button>
+                </div>
+                
+                <!-- Mission 6: Climate Action -->
+                <div class="mission-card" onclick="startMission('climate-action')">
+                    <div class="mission-icon">🌍</div>
+                    <div class="mission-title">Climate Action for Oceans</div>
+                    <div class="mission-description">
+                        Take action against climate change to protect ocean ecosystems and marine life!
+                    </div>
+                    <div class="mission-objectives">
+                        <div class="objective-title">🎯 Mission Objectives:</div>
+                        <ul class="objective-list">
+                            <li>Reduce carbon footprint</li>
+                            <li>Plant trees and mangroves</li>
+                            <li>Use renewable energy</li>
+                            <li>Advocate for climate action</li>
+                        </ul>
+                    </div>
+                    <div class="mission-reward">🏆 Reward: Climate Warrior Badge + 180 Points</div>
+                    <button class="start-mission-btn">Take Climate Action</button>
+                </div>
+            </div>
+            
+            <div class="progress-section">
+                <h2 class="progress-title">📊 Your Conservation Progress</h2>
+                <p style="color: #e1f5fe; margin-bottom: 30px;">Track your impact on ocean conservation and see how you're helping protect marine life!</p>
+                
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalPoints">0</div>
+                        <div class="stat-label">Total Points Earned</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="missionsCompleted">0</div>
+                        <div class="stat-label">Missions Completed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="badgesEarned">0</div>
+                        <div class="stat-label">Badges Earned</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="oceanImpact">0%</div>
+                        <div class="stat-label">Ocean Impact</div>
+                    </div>
+                </div>
+                
+                <h3 style="color: #00d4ff; margin: 40px 0 20px;">🏆 Your Achievements</h3>
+                <div class="achievements">
+                    <div class="achievement-card">
+                        <div class="achievement-icon">🧹</div>
+                        <div class="achievement-title">Beach Cleaner</div>
+                        <div class="achievement-description">Cleaned up 50+ pieces of plastic waste</div>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">🪸</div>
+                        <div class="achievement-title">Reef Guardian</div>
+                        <div class="achievement-description">Protected coral reefs from damage</div>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">🐋</div>
+                        <div class="achievement-title">Marine Hero</div>
+                        <div class="achievement-description">Rescued 10+ marine animals</div>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">📚</div>
+                        <div class="achievement-title">Ocean Educator</div>
+                        <div class="achievement-description">Taught 100+ people about conservation</div>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">🎣</div>
+                        <div class="achievement-title">Sustainable Fisher</div>
+                        <div class="achievement-description">Practiced sustainable fishing methods</div>
+                    </div>
+                    <div class="achievement-card">
+                        <div class="achievement-icon">🌍</div>
+                        <div class="achievement-title">Climate Warrior</div>
+                        <div class="achievement-description">Took action against climate change</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer> 2025 AquaTrace AI — Save the Ocean Together 🌊</footer>
+    
+    <script>
+        // Mobile navigation toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('nav-open');
+                navToggle.classList.toggle('nav-open');
+            });
+            
+            navLinks.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    navLinks.classList.remove('nav-open');
+                    navToggle.classList.remove('nav-open');
+                }
+            });
+        }
+        
+        // Game state management
+        let gameState = {
+            totalPoints: 0,
+            missionsCompleted: 0,
+            badgesEarned: 0,
+            oceanImpact: 0
+        };
+        
+        // Load game state from localStorage
+        function loadGameState() {
+            const saved = localStorage.getItem('oceanGameState');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                updateProgressDisplay();
+            }
+        }
+        
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('oceanGameState', JSON.stringify(gameState));
+        }
+        
+        // Update progress display
+        function updateProgressDisplay() {
+            document.getElementById('totalPoints').textContent = gameState.totalPoints;
+            document.getElementById('missionsCompleted').textContent = gameState.missionsCompleted;
+            document.getElementById('badgesEarned').textContent = gameState.badgesEarned;
+            document.getElementById('oceanImpact').textContent = gameState.oceanImpact + '%';
+        }
+        
+        // Start mission function
+        function startMission(missionType) {
+            const missionInfo = {
+                'beach-cleanup': {
+                    name: 'Beach Cleanup Mission',
+                    emoji: '🏖️',
+                    description: 'Help clean up the beach and remove harmful plastic waste!',
+                    tasks: [
+                        'Collect plastic bottles and bags',
+                        'Sort recyclable materials',
+                        'Remove fishing nets and lines',
+                        'Clean up microplastics'
+                    ],
+                    points: 100,
+                    badge: 'Ocean Cleaner'
+                },
+                'coral-protection': {
+                    name: 'Coral Reef Protection',
+                    emoji: '🪸',
+                    description: 'Protect the beautiful coral reefs from damage!',
+                    tasks: [
+                        'Monitor coral health and growth',
+                        'Remove harmful algae and debris',
+                        'Plant new coral fragments',
+                        'Educate about reef conservation'
+                    ],
+                    points: 150,
+                    badge: 'Reef Guardian'
+                },
+                'marine-rescue': {
+                    name: 'Marine Life Rescue',
+                    emoji: '🐋',
+                    description: 'Rescue marine animals from dangerous situations!',
+                    tasks: [
+                        'Rescue entangled sea turtles',
+                        'Help stranded dolphins return to sea',
+                        'Remove fishing nets from whales',
+                        'Release healthy animals safely'
+                    ],
+                    points: 200,
+                    badge: 'Marine Hero'
+                },
+                'ocean-education': {
+                    name: 'Ocean Education Campaign',
+                    emoji: '📚',
+                    description: 'Spread awareness about ocean conservation!',
+                    tasks: [
+                        'Create educational posters',
+                        'Give presentations to friends',
+                        'Share conservation tips online',
+                        'Organize community events'
+                    ],
+                    points: 120,
+                    badge: 'Ocean Educator'
+                },
+                'sustainable-fishing': {
+                    name: 'Sustainable Fishing Practices',
+                    emoji: '🎣',
+                    description: 'Learn about sustainable fishing methods!',
+                    tasks: [
+                        'Learn about fish breeding seasons',
+                        'Practice catch and release fishing',
+                        'Identify protected species',
+                        'Promote sustainable practices'
+                    ],
+                    points: 130,
+                    badge: 'Sustainable Fisher'
+                },
+                'climate-action': {
+                    name: 'Climate Action for Oceans',
+                    emoji: '🌍',
+                    description: 'Take action against climate change!',
+                    tasks: [
+                        'Reduce your carbon footprint',
+                        'Plant trees and mangroves',
+                        'Use renewable energy sources',
+                        'Advocate for climate action'
+                    ],
+                    points: 180,
+                    badge: 'Climate Warrior'
+                }
+            };
+            
+            const info = missionInfo[missionType];
+            if (info) {
+                showMissionModal(info);
+            }
+        }
+        
+        function showMissionModal(info) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 3000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: linear-gradient(135deg, rgba(0, 30, 60, 0.9), rgba(0, 15, 35, 0.9));
+                    border-radius: 20px;
+                    padding: 40px;
+                    max-width: 600px;
+                    width: 90%;
+                    border: 2px solid rgba(0, 212, 255, 0.3);
+                    text-align: center;
+                    color: white;
+                ">
+                    <div style="font-size: 4rem; margin-bottom: 20px;">${info.emoji}</div>
+                    <h2 style="color: #00d4ff; margin-bottom: 20px; font-size: 2.5em;">${info.name}</h2>
+                    <p style="color: #e1f5fe; margin-bottom: 30px; font-size: 1.2em; line-height: 1.6;">${info.description}</p>
+                    
+                    <h3 style="color: #00d4ff; margin-bottom: 20px;">🎯 Mission Tasks:</h3>
+                    <div style="text-align: left; margin-bottom: 30px;">
+                        ${info.tasks.map(task => `
+                            <div style="
+                                background: rgba(0, 212, 255, 0.1);
+                                color: #e1f5fe;
+                                padding: 10px 15px;
+                                margin: 8px 0;
+                                border-radius: 10px;
+                                border-left: 4px solid #00d4ff;
+                            ">${task}</div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="
+                        background: rgba(0, 212, 255, 0.2);
+                        padding: 20px;
+                        border-radius: 15px;
+                        margin-bottom: 30px;
+                        border: 1px solid rgba(0, 212, 255, 0.3);
+                    ">
+                        <div style="color: #00d4ff; font-weight: 700; margin-bottom: 10px;">🏆 Mission Rewards:</div>
+                        <div style="color: #e1f5fe;">${info.points} Points + ${info.badge} Badge</div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center;">
+                        <button onclick="completeMission('${info.badge}', ${info.points})" style="
+                            background: linear-gradient(135deg, #00d4ff, #0099cc);
+                            color: white;
+                            border: none;
+                            padding: 15px 30px;
+                            border-radius: 25px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            font-size: 1.1em;
+                        ">Complete Mission</button>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="
+                            background: rgba(255, 255, 255, 0.2);
+                            color: white;
+                            border: none;
+                            padding: 15px 30px;
+                            border-radius: 25px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            font-size: 1.1em;
+                        ">Close</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function completeMission(badge, points) {
+            // Update game state
+            gameState.totalPoints += points;
+            gameState.missionsCompleted += 1;
+            gameState.badgesEarned += 1;
+            gameState.oceanImpact = Math.min(100, gameState.oceanImpact + 15);
+            
+            // Save to localStorage
+            saveGameState();
+            
+            // Update display
+            updateProgressDisplay();
+            
+            // Show completion message
+            showNotification(`🎉 Mission Complete! You earned ${points} points and the ${badge} badge!`, 'success');
+            
+            // Close modal
+            document.querySelector('[style*="position: fixed"]').remove();
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? 'rgba(34, 197, 94, 0.9)' : 
+                           type === 'error' ? 'rgba(239, 68, 68, 0.9)' : 
+                           'rgba(0, 212, 255, 0.9)'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                z-index: 1001;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', function() {
+            loadGameState();
+        });
+    </script>
+</body>
+</html>

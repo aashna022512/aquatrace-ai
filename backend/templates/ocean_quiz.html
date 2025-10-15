@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Quiz - AquaTrace AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <style>
+        .quiz{max-width:900px;margin:0 auto;padding:20px;text-align:center}
+        .qcard{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:22px;margin-top:18px}
+        .answers{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:14px}
+        .btn{padding:12px;border-radius:14px;border:0;background:linear-gradient(135deg,#00d4ff,#0099cc);color:#fff;font-weight:700;cursor:pointer}
+        .score{margin-top:16px;color:#00ff88;font-weight:700}
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">🌊 AquaTrace AI</div>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/species_explorer">Explorer</a>
+        </div>
+    </nav>
+    <div class="content quiz">
+        <h1>🧠 Ocean Quiz</h1>
+        <p>Answer the questions and earn your Ocean Hero badge!</p>
+        <div id="card" class="qcard">
+            <div id="question">Loading...</div>
+            <div id="answers" class="answers"></div>
+            <div id="feedback" style="margin-top:10px"></div>
+        </div>
+        <div id="score" class="score"></div>
+    </div>
+    <footer> 2025 AquaTrace AI — Keep our oceans smiling 🌊</footer>
+    <script>
+        const questions=[
+            {q:'Which animal has three hearts?',a:['Octopus','Dolphin','Shark','Whale'],c:0},
+            {q:'What do turtles eat a lot of?',a:['Seagrass','Clouds','Rocks','Lightning'],c:0},
+            {q:'Which is the biggest animal?',a:['Blue Whale','Giant Squid','Great White Shark','Elephant'],c:0},
+            {q:'Jellyfish are mostly...?',a:['Water','Metal','Sand','Wood'],c:0}
+        ];
+        let i=0,score=0; const qEl=document.getElementById('question'); const aEl=document.getElementById('answers'); const fEl=document.getElementById('feedback');
+        function render(){
+            const {q,a,c}=questions[i]; qEl.textContent=q; aEl.innerHTML=''; fEl.textContent='';
+            a.forEach((t,idx)=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=t; b.onclick=()=>select(idx===c); aEl.appendChild(b); });
+        }
+        function select(ok){ if(ok){score++; fEl.style.color='#00ff88'; fEl.textContent='Correct! 🎉';} else {fEl.style.color='#ff7777'; fEl.textContent='Oops, try the next one!';}
+            i++; if(i<questions.length){ setTimeout(render,700);} else { document.getElementById('score').textContent=`Your score: ${score}/${questions.length} — Ocean Hero! 🏅`; }
+        }
+        render();
+    </script>
+</body>
+</html>
+
+
+
